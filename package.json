@@ -1,0 +1,15 @@
+{
+  "name": "ruby_on_rails_tutorial_by_express",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "kino2718",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
