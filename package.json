@@ -2,11 +2,11 @@
   "name": "ruby_on_rails_tutorial_by_express",
   "version": "1.0.0",
   "description": "",
-  "license": "ISC",
+  "license": "MIT",
   "author": "kino2718",
   "type": "commonjs",
-  "main": "app.js",
   "scripts": {
+    "start": "node app/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
