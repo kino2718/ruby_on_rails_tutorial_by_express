@@ -13,3 +13,14 @@ $ npm start
 として下さい。
 
 その後 Web Browser 等で localhost:3000 にアクセスして下さい。
+
+## テスト方法
+
+アプリのトップディレクトリで
+```bash
+$ npm run test
+```
+
+として下さい。
+
+テストは Jest + supertest を使用しています。
