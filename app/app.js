@@ -23,4 +23,8 @@ app.get('/static_pages/help', (req, res) => {
   static_pages_controller.help(req, res)
 })
 
+app.get('/static_pages/about', (req, res) => {
+  static_pages_controller.about(req, res)
+})
+
 module.exports = app

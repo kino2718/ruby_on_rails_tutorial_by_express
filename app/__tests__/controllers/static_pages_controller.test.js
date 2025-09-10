@@ -13,4 +13,9 @@ describe('static pages controller test', () => {
         const res = await request(app).get('/static_pages/help')
         expect(res.status).toBe(SUCCESS)
     })
+
+    test('should get about', async () => {
+        const res = await request(app).get('/static_pages/about')
+        expect(res.status).toBe(SUCCESS)
+    })
 })
