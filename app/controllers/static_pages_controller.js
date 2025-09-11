@@ -2,7 +2,6 @@ const express = require('express')
 const router = express.Router()
 
 router.get('/home', (req, res) => {
-    console.log('call home')
     home(req, res)
 })
 
@@ -26,4 +25,7 @@ function about(req, res) {
     res.render('static_pages/about', { title: "About" })
 }
 
-module.exports = router
+module.exports = {
+    router,
+    home,
+}

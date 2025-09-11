@@ -1,12 +1,11 @@
 const express = require('express')
+const static_pages_controller = require('./static_pages_controller')
 const router = express.Router()
 
 router.get('/', (req, res) => {
-    hello(req, res)
+    static_pages_controller.home(req, res)
 })
 
-function hello(req, res) {
-    res.send("hello, world!")
+module.exports = {
+    router,
 }
-
-module.exports = router
