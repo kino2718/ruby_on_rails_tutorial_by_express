@@ -15,15 +15,15 @@ router.get('/about', (req, res) => {
 })
 
 function home(req, res) {
-    res.render('static_pages/home')
+    res.render('static_pages/home', { title: "Home" })
 }
 
 function help(req, res) {
-    res.render('static_pages/help')
+    res.render('static_pages/help', { title: "Help" })
 }
 
 function about(req, res) {
-    res.render('static_pages/about')
+    res.render('static_pages/about', { title: "About" })
 }
 
 module.exports = router
