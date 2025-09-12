@@ -14,15 +14,15 @@ router.get('/about', (req, res) => {
 })
 
 function home(req, res) {
-    res.render('static_pages/home', { title: "Home" })
+    res.render('static_pages/home', { title: undefined })
 }
 
 function help(req, res) {
-    res.render('static_pages/help', { title: "Help" })
+    res.render('static_pages/help', { title: 'Help' })
 }
 
 function about(req, res) {
-    res.render('static_pages/about', { title: "About" })
+    res.render('static_pages/about', { title: 'About' })
 }
 
 module.exports = {

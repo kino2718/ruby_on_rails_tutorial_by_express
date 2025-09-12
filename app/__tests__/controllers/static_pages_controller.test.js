@@ -9,7 +9,7 @@ describe('static pages controller test', () => {
         const res = await request(app).get('/static_pages/home')
         expect(res.status).toBe(SUCCESS)
         const $ = cheerio.load(res.text)
-        expect($('title').text()).toBe('Home | Ruby on Rails Tutorial Sample App')
+        expect($('title').text()).toBe('Ruby on Rails Tutorial Sample App')
     })
 
     test('should get help', async () => {
