@@ -9,20 +9,20 @@ describe('static pages controller test', () => {
         const res = await request(app).get('/static_pages/home')
         expect(res.status).toBe(SUCCESS)
         const $ = cheerio.load(res.text)
-        expect($('title').text()).toBe('Ruby on Rails Tutorial Sample App')
+        expect($('title').text().trim()).toBe('Ruby on Rails Tutorial Sample App')
     })
 
     test('should get help', async () => {
         const res = await request(app).get('/static_pages/help')
         expect(res.status).toBe(SUCCESS)
         const $ = cheerio.load(res.text)
-        expect($('title').text()).toBe('Help | Ruby on Rails Tutorial Sample App')
+        expect($('title').text().trim()).toBe('Help | Ruby on Rails Tutorial Sample App')
     })
 
     test('should get about', async () => {
         const res = await request(app).get('/static_pages/about')
         expect(res.status).toBe(SUCCESS)
         const $ = cheerio.load(res.text)
-        expect($('title').text()).toBe('About | Ruby on Rails Tutorial Sample App')
+        expect($('title').text().trim()).toBe('About | Ruby on Rails Tutorial Sample App')
     })
 })

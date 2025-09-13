@@ -7,9 +7,13 @@ const application_helper = require('./helpers/application_helper')
 const app = express()
 
 // set the directory of template files
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'views'))
 // set the template engine to ejs
 app.set('view engine', 'ejs')
+
+// set the root directory of static assets
+app.use(express.static(path.join(__dirname, 'assets')))
+
 // register helper functions
 app.locals.full_title = application_helper.full_title
 
