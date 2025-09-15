@@ -25,4 +25,11 @@ describe('static pages controller test', () => {
         const $ = cheerio.load(res.text)
         expect($('title').text().trim()).toBe('About | Ruby on Rails Tutorial Sample App')
     })
+
+    test('should get contact', async () => {
+        const res = await request(app).get('/static_pages/contact')
+        expect(res.status).toBe(SUCCESS)
+        const $ = cheerio.load(res.text)
+        expect($('title').text().trim()).toBe('Contact | Ruby on Rails Tutorial Sample App')
+    })
 })

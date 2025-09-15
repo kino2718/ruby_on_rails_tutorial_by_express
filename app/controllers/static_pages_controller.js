@@ -13,6 +13,10 @@ router.get('/about', (req, res) => {
     about(req, res)
 })
 
+router.get('/contact', (req, res) => {
+    contact(req, res)
+})
+
 function home(req, res) {
     res.render('static_pages/home', { title: undefined })
 }
@@ -23,6 +27,10 @@ function help(req, res) {
 
 function about(req, res) {
     res.render('static_pages/about', { title: 'About' })
+}
+
+function contact(req, res) {
+    res.render('static_pages/contact', { title: 'Contact' })
 }
 
 module.exports = {
