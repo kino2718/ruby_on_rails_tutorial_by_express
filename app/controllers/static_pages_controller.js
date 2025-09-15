@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-router.get('/home', (req, res) => {
+router.get('/', (req, res) => {
     home(req, res)
 })
 
@@ -35,5 +35,4 @@ function contact(req, res) {
 
 module.exports = {
     router,
-    home,
 }
