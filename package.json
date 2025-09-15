@@ -7,11 +7,15 @@
   "type": "commonjs",
   "scripts": {
     "start": "node app/server.js",
-    "test": "jest"
+    "test": "jest",
+    "build:css": "sass --load-path=node_modules app/assets/stylesheets/application.scss app/assets/stylesheets/application.css --style=compressed",
+    "watch:css": "sass --watch --load-path=node_modules app/assets/stylesheets/application.scss:app/assets/stylesheets/application.css"
   },
   "dependencies": {
+    "bootstrap": "^5.3.8",
     "ejs": "^3.1.10",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "sass": "^1.92.1"
   },
   "devDependencies": {
     "cheerio": "^1.1.2",
