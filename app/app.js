@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
 const static_pages_controller = require('./controllers/static_pages_controller')
+const users_controller = require('./controllers/users_controller')
 const application_helper = require('./helpers/application_helper')
 
 const app = express()
@@ -18,5 +19,6 @@ app.locals.full_title = application_helper.full_title
 
 // use express.Router
 app.use('/', static_pages_controller.router)
+app.use('/users', users_controller.router)
 
 module.exports = app
