@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node app/server.js",
     "test": "jest",
+    "test:watch": "jest --watch",
     "build:css": "sass --load-path=node_modules app/assets/stylesheets/application.scss app/assets/stylesheets/application.css --style=compressed",
     "watch:css": "sass --watch --load-path=node_modules app/assets/stylesheets/application.scss:app/assets/stylesheets/application.css --style=compressed"
   },
