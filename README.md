@@ -53,4 +53,11 @@ $ npm run test
 
 として下さい。
 
+ソースコード修正時に自動でテストが走るようにするには
+```bash
+$ npm run test:watch
+```
+
+として下さい。
+
 テストは Jest + supertest + cheerio を使用しています。
