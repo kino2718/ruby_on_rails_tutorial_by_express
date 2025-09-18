@@ -10,13 +10,20 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "build:css": "sass --load-path=node_modules app/assets/stylesheets/application.scss app/assets/stylesheets/application.css --style=compressed",
-    "watch:css": "sass --watch --load-path=node_modules app/assets/stylesheets/application.scss:app/assets/stylesheets/application.css --style=compressed"
+    "watch:css": "sass --watch --load-path=node_modules app/assets/stylesheets/application.scss:app/assets/stylesheets/application.css --style=compressed",
+    "migrate:latest:dev": "knex migrate:latest --env development",
+    "migrate:rollback:dev": "knex migrate:rollback --env development",
+    "migrate:latest:prod": "knex migrate:latest --env production",
+    "migrate:rollback:prod": "knex migrate:rollback --env production"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
-    "sass": "^1.92.1"
+    "knex": "^3.1.0",
+    "pg": "^8.16.3",
+    "sass": "^1.92.1",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "cheerio": "^1.1.2",

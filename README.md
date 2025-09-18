@@ -8,6 +8,10 @@ JavaScript と Express で実装した Web アプリです。
 -   EJS: Embedded JavaScript templates
 -   Bootstrap, sass: CSS framework
 -   Jest, supertest, cheerio: Test tools
+-   sqlite3: 開発環境用データベース Sqlite3 用。
+-   pg: プロダクト環境用データベース PostgreSQL 用。
+-   knex: SQL query builder. 開発環境用の Sqlite3 と プロダクト環境用の PostgreSQL を共存させるために使用。
+    直接 SQL を書かなくても良くなる。
 
 ## ローカルでの使い方
 
@@ -61,3 +65,17 @@ $ npm run test:watch
 として下さい。
 
 テストは Jest + supertest + cheerio を使用しています。
+
+## データベース作成
+
+開発環境ではアプリのトップディレクトリで
+```bash
+$ npm run migrate:latest:dev
+```
+
+プロダクト環境では
+```bash
+$ npm run migrate:latest:prod
+```
+
+として下さい。
