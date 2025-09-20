@@ -79,3 +79,37 @@ $ npm run migrate:latest:prod
 ```
 
 として下さい。
+
+## コンソール機能
+
+コンソール上でデバッグが行えます。
+
+アプリのトップディレクトリで
+```bash
+$ npm run console
+```
+
+として下さい。
+
+コンソール上で行ったデータベースへの書き込みを一時的なものにしたい場合は
+```bash
+$ npm run console:sandbox
+```
+
+として下さい。
+`./tmp/sqlite3` という名前のデータベースを一時的に作成し、作業終了後に削除します。
+
+コンソールの起動時に `./setup_console.js` が実行されます。
+コンソール上でデバッグしたいクラス等は
+```js
+// setup_console.js
+const User = require('./app/models/user')
+global.User = User
+```
+
+等としておくとコンソール上で
+```js
+let user = new User()
+```
+
+等とできるので便利です。
