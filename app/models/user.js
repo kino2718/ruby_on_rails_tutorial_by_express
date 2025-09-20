@@ -36,7 +36,7 @@ class User extends RecordBase {
     async #insert() {
         try {
             const [res] = await knex('users').insert({ name: this.name, email: this.email }).returning('id')
-            const u = await this.find(res.id)
+            const u = await User.find(res.id)
             if (!u) return false
             Object.assign(this, u)
             this.setSaved()
@@ -50,12 +50,12 @@ class User extends RecordBase {
 
     async #update() {
         try {
-            const attrs = {name: this.name, email: this.email}
+            const attrs = { name: this.name, email: this.email }
             const [res] = await knex('users')
                 .where('id', this.id)
                 .update({ ...attrs, updated_at: knex.fn.now() }) // updated_at はデータベース側で更新
                 .returning('id');
-            const u = await this.find(res.id)
+            const u = await User.find(res.id)
             if (!u) return false
             Object.assign(this, u)
             this.setSaved()
@@ -64,15 +64,6 @@ class User extends RecordBase {
         } catch (e) {
             console.error(e)
             return false
-        }
-    }
-
-    async find(id) {
-        try {
-            return knex('users').where('id', id).first()
-        } catch (e) {
-            console.error(e)
-            return null
         }
     }
 
@@ -94,6 +85,15 @@ class User extends RecordBase {
         if (user.save()) {
             return user
         } else {
+            return null
+        }
+    }
+
+    static async find(id) {
+        try {
+            return knex('users').select('*').where('id', id).first()
+        } catch (e) {
+            console.error(e)
             return null
         }
     }
