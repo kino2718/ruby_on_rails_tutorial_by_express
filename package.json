@@ -14,7 +14,9 @@
     "migrate:latest:dev": "knex migrate:latest --env development",
     "migrate:rollback:dev": "knex migrate:rollback --env development",
     "migrate:latest:prod": "knex migrate:latest --env production",
-    "migrate:rollback:prod": "knex migrate:rollback --env production"
+    "migrate:rollback:prod": "knex migrate:rollback --env production",
+    "console": "NODE_ENV=development node -i -r ./setup_console.js",
+    "console:sandbox": "SQLITE_FILENAME=./tmp.sqlite3 knex migrate:latest --env development && NODE_ENV=development SQLITE_FILENAME=./tmp.sqlite3 node -i -r ./setup_console.js; rm -f ./tmp.sqlite3"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
