@@ -97,6 +97,23 @@ class User extends RecordBase {
             return null
         }
     }
+
+    static async findBy(params = {}) {
+        try {
+            return knex('users').select('*').where(params)
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
+    static async first() {
+        return knex('users').select('*').orderBy('id', 'asc').limit(1).first()
+    }
+
+    static async all() {
+        return knex('users').select('*').orderBy('id', 'asc')
+    }
 }
 
 module.exports = User
