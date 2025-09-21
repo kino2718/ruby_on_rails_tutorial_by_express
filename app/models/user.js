@@ -17,10 +17,27 @@ class User extends RecordBase {
     }
 
     valid() {
-        return true
+        this.errors = []
+        let v = true
+        // name presence
+        if (!User.#presence(this.name)) {
+            v = false
+            this.errors.push("name can't be blank")
+        }
+
+        // email presence
+        if (!User.#presence(this.email)) {
+            v = false
+            this.errors.push("email can't be blank")
+        }
+
+        if (v) this.errors = undefined
+        return v
     }
 
     async save() {
+        if (!this.valid()) return false
+
         if (this.newRecord) {
             // insert
             return this.#insert()
@@ -37,6 +54,8 @@ class User extends RecordBase {
         if (this.persisted) {
             const attrs = { name: params.name, email: params.email }
             Object.assign(this, attrs)
+            if (!this.valid()) return false
+
             return this.#update()
         } else {
             return false
@@ -138,6 +157,10 @@ class User extends RecordBase {
 
     static async all() {
         return knex('users').select('*').orderBy('id', 'asc')
+    }
+
+    static #presence(str) {
+        return (str && str.trim())
     }
 }
 
