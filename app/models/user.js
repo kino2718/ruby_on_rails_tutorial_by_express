@@ -24,11 +24,21 @@ class User extends RecordBase {
             v = false
             this.errors.push("name can't be blank")
         }
+        // name length
+        if (!User.#length(this.name, {maximum: 50})) {
+            v = false
+            this.errors.push('name is too long')
+        }
 
         // email presence
         if (!User.#presence(this.email)) {
             v = false
             this.errors.push("email can't be blank")
+        }
+        // email length
+        if (!User.#length(this.email, {maximum: 255})) {
+            v = false
+            this.errors.push('email is too long')
         }
 
         if (v) this.errors = undefined
@@ -161,6 +171,13 @@ class User extends RecordBase {
 
     static #presence(str) {
         return (str && str.trim())
+    }
+
+    static #length(str, conds) {
+        if (conds.maximum) {
+            return str.length <= conds.maximum
+        }
+        return true
     }
 }
 
