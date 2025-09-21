@@ -24,7 +24,7 @@ class User extends RecordBase {
         if (this.newRecord) {
             // insert
             return this.#insert()
-        } else if (!this.destroyed) {
+        } else if (this.persisted) {
             // update
             return this.#update()
         } else {
@@ -33,12 +33,20 @@ class User extends RecordBase {
         }
     }
 
+    async update(params = {}) {
+        if (this.persisted) {
+            const attrs = { name: params.name, email: params.email }
+            Object.assign(this, attrs)
+            return this.#update()
+        } else {
+            return false
+        }
+    }
+
     async #insert() {
         try {
             const [res] = await knex('users').insert({ name: this.name, email: this.email }).returning('id')
-            const u = await User.find(res.id)
-            if (!u) return false
-            Object.assign(this, u)
+            await this.#reload(res.id)
             this.setSaved()
             debugLog(this)
             return true
@@ -54,12 +62,29 @@ class User extends RecordBase {
             const [res] = await knex('users')
                 .where('id', this.id)
                 .update({ ...attrs, updated_at: knex.fn.now() }) // updated_at はデータベース側で更新
-                .returning('id');
-            const u = await User.find(res.id)
-            if (!u) return false
-            Object.assign(this, u)
+                .returning('id')
+            await this.#reload(res.id)
             this.setSaved()
             debugLog(this)
+            return true
+        } catch (e) {
+            console.error(e)
+            return false
+        }
+    }
+
+    async reload() {
+        if (this.persisted) {
+            await this.#reload(this.id)
+        }
+        return this
+    }
+
+    async #reload(id) {
+        try {
+            const u = await User.find(id)
+            if (!u) return false
+            Object.assign(this, u)
             return true
         } catch (e) {
             console.error(e)
