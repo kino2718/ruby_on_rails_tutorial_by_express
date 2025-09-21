@@ -25,7 +25,7 @@ class User extends RecordBase {
             this.errors.push("name can't be blank")
         }
         // name length
-        if (!User.#length(this.name, {maximum: 50})) {
+        if (!User.#valid_length(this.name, { maximum: 50 })) {
             v = false
             this.errors.push('name is too long')
         }
@@ -36,9 +36,15 @@ class User extends RecordBase {
             this.errors.push("email can't be blank")
         }
         // email length
-        if (!User.#length(this.email, {maximum: 255})) {
+        if (!User.#valid_length(this.email, { maximum: 255 })) {
             v = false
             this.errors.push('email is too long')
+        }
+        // email format
+        const VALID_EMAIL_REGEX = /^[\w+\-.]+@[a-z\d\-.]+\.[a-z]+$/i
+        if (!User.#valid_format(this.email, { with: VALID_EMAIL_REGEX })) {
+            v = false
+            this.errors.push('email is invalid')
         }
 
         if (v) this.errors = undefined
@@ -173,11 +179,17 @@ class User extends RecordBase {
         return (str && str.trim())
     }
 
-    static #length(str, conds) {
+    static #valid_length(str, conds) {
         if (conds.maximum) {
             return str.length <= conds.maximum
         }
         return true
+    }
+
+    static #valid_format(str, conds) {
+        if (conds.with) {
+            return conds.with.test(str)
+        }
     }
 }
 

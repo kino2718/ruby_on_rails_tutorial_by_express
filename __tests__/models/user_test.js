@@ -34,4 +34,30 @@ describe('user model test', () => {
         user.email = 'a'.repeat(244) + '@example.com'
         expect(user.valid()).toBe(false)
     })
+
+    test('email validation should accept valid addresses', () => {
+        const validAddresses = ['user@example.com', 'USER@foo.COM', 'A_US-ER@foo.bar.org', 'first.last@foo.jp', 'alice+bob@baz.cn']
+        validAddresses.forEach(validAddress => {
+            user.email = validAddress
+            try {
+                expect(user.valid()).toBe(true)
+            } catch (e) {
+                console.log(`${validAddress} should be valid`)
+                throw e
+            }
+        })
+    })
+
+    test('email validation should reject invalid addresses', () => {
+        const invalidAddresses = ['user@example,com', 'user_at_foo.org', 'user.name@example.', 'foo@bar_baz.com', 'foo@bar+baz.com']
+        invalidAddresses.forEach(invalidAddress => {
+            user.email = invalidAddress
+            try {
+                expect(user.valid()).toBe(false)
+            } catch (e) {
+                console.log(`${invalidAddress} should be invalid`)
+                throw e
+            }
+        })
+    })
 })
