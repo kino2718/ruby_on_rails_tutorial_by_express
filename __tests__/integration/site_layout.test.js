@@ -1,6 +1,6 @@
 const request = require('supertest')
 const cheerio = require('cheerio')
-const app = require('../../app')
+const app = require('../../app/app')
 
 const SUCCESS = 200
 
