@@ -19,6 +19,7 @@
     "console:sandbox": "SQLITE_FILENAME=./tmp.sqlite3 knex migrate:latest --env development && NODE_ENV=development SQLITE_FILENAME=./tmp.sqlite3 node -i -r ./setup_console.js; rm -f ./tmp.sqlite3"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "bootstrap": "^5.3.8",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
