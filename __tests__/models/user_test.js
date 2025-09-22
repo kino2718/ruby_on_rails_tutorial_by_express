@@ -60,4 +60,18 @@ describe('user model test', () => {
             }
         })
     })
+
+    test('email addresses should be unique', async () => {
+        const duplicateUser = user.dup()
+        duplicateUser.email = user.email.toUpperCase()
+        await user.save()
+        expect(await duplicateUser.validAsync()).toBe(false)
+    })
+
+    const knex_utils = require('../../app/db/knex_utils')
+    const knex = knex_utils.knex
+
+    afterAll(async () => {
+        await knex.destroy();   // コネクションを閉じる
+    });
 })

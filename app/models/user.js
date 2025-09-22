@@ -51,6 +51,20 @@ class User extends RecordBase {
         return v
     }
 
+    async validAsync() {
+        this.asyncErrors = []
+        let v = true
+
+        // email uniqueness
+        if (! await User.#uniqueness({ email: this.email })) {
+            v = false
+            this.asyncErrors.push('email has already been taken')
+        }
+
+        if (v) this.asyncErrors = undefined
+        return v
+    }
+
     async save() {
         if (!this.valid()) return false
 
@@ -68,7 +82,7 @@ class User extends RecordBase {
 
     async update(params = {}) {
         if (this.persisted) {
-            const attrs = { name: params.name, email: params.email }
+            const attrs = User.#userInputParams(params)
             Object.assign(this, attrs)
             if (!this.valid()) return false
 
@@ -80,7 +94,8 @@ class User extends RecordBase {
 
     async #insert() {
         try {
-            const [res] = await knex('users').insert({ name: this.name, email: this.email }).returning('id')
+            this.email = this.email.toLowerCase()
+            const [res] = await knex('users').insert(User.#userInputParams(this)).returning('id')
             await this.#reload(res.id)
             this.setSaved()
             debugLog(this)
@@ -93,7 +108,8 @@ class User extends RecordBase {
 
     async #update() {
         try {
-            const attrs = { name: this.name, email: this.email }
+            this.email = this.email.toLowerCase()
+            const attrs = User.#userInputParams(this)
             const [res] = await knex('users')
                 .where('id', this.id)
                 .update({ ...attrs, updated_at: knex.fn.now() }) // updated_at はデータベース側で更新
@@ -125,6 +141,11 @@ class User extends RecordBase {
             console.error(e)
             return false
         }
+    }
+
+    dup() {
+        const u = new User()
+        return Object.assign(u, User.#userInputParams(this))
     }
 
     async destroy() {
@@ -175,6 +196,10 @@ class User extends RecordBase {
         return knex('users').select('*').orderBy('id', 'asc')
     }
 
+    static #userInputParams(params) {
+        return { name: params.name, email: params.email }
+    }
+
     static #presence(str) {
         return (str && str.trim())
     }
@@ -190,6 +215,12 @@ class User extends RecordBase {
         if (conds.with) {
             return conds.with.test(str)
         }
+    }
+
+    static async #uniqueness(conds) {
+        if (conds.email) conds.email = conds.email.toLowerCase()
+        const temp = await User.findBy(conds)
+        return temp.length == 0
     }
 }
 
