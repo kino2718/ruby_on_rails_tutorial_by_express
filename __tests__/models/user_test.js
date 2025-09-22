@@ -4,7 +4,10 @@ describe('user model test', () => {
     let user
 
     beforeEach(() => {
-        user = new User({ name: 'Example User', email: 'user@example.com' })
+        user = new User({
+            name: 'Example User', email: 'user@example.com',
+            password: 'foobar', password_confirmation: 'foobar'
+        })
     });
 
     test('should be valid', () => {

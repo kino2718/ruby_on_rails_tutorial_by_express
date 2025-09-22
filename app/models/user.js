@@ -14,6 +14,19 @@ class User extends RecordBase {
         super()
         this.name = params.name
         this.email = params.email
+        this.password = params.password
+        this.password_confirmation = params.password_confirmation
+    }
+
+    static #userInputParams(params) {
+        return {
+            name: params.name, email: params.email,
+            password: params.password, password_confirmation: params.password_confirmation
+        }
+    }
+
+    #paramsToDB() {
+        return { name: this.name, email: this.email }
     }
 
     valid() {
@@ -45,6 +58,24 @@ class User extends RecordBase {
         if (!User.#valid_format(this.email, { with: VALID_EMAIL_REGEX })) {
             v = false
             this.errors.push('email is invalid')
+        }
+
+        // password presence
+        if (!User.#presence(this.password)) {
+            v = false
+            this.errors.push("password can't be blank")
+        }
+
+        // password_confirmation presence
+        if (!User.#presence(this.password_confirmation)) {
+            v = false
+            this.errors.push("password_confirmation can't be blank")
+        }
+
+        // password and password_confirmation must be equal
+        if (this.password !== this.password_confirmation) {
+            v = false
+            this.errors.push("password confirmation doesn't match password")
         }
 
         if (v) this.errors = undefined
@@ -82,8 +113,8 @@ class User extends RecordBase {
 
     async update(params = {}) {
         if (this.persisted) {
-            const attrs = User.#userInputParams(params)
-            Object.assign(this, attrs)
+            const params2 = User.#userInputParams(params)
+            Object.assign(this, params2)
             if (!this.valid()) return false
 
             return this.#update()
@@ -95,7 +126,8 @@ class User extends RecordBase {
     async #insert() {
         try {
             this.email = this.email.toLowerCase()
-            const [res] = await knex('users').insert(User.#userInputParams(this)).returning('id')
+            const params = this.#paramsToDB()
+            const [res] = await knex('users').insert(params).returning('id')
             await this.#reload(res.id)
             this.setSaved()
             debugLog(this)
@@ -109,10 +141,10 @@ class User extends RecordBase {
     async #update() {
         try {
             this.email = this.email.toLowerCase()
-            const attrs = User.#userInputParams(this)
+            const params = this.#paramsToDB()
             const [res] = await knex('users')
                 .where('id', this.id)
-                .update({ ...attrs, updated_at: knex.fn.now() }) // updated_at はデータベース側で更新
+                .update({ ...params, updated_at: knex.fn.now() }) // updated_at はデータベース側で更新
                 .returning('id')
             await this.#reload(res.id)
             this.setSaved()
@@ -194,10 +226,6 @@ class User extends RecordBase {
 
     static async all() {
         return knex('users').select('*').orderBy('id', 'asc')
-    }
-
-    static #userInputParams(params) {
-        return { name: params.name, email: params.email }
     }
 
     static #presence(str) {
