@@ -7,6 +7,8 @@ class User extends RecordBase {
     id // 自動で割り振られる。user.id = 3 等の id の手動での変更は save 時にエラーになる。変更しないこと
     name
     email
+    password
+    password_confirmation
     created_at // 自動で割り振られる
     updated_at // 自動で割り振られる
 
@@ -239,6 +241,8 @@ class User extends RecordBase {
     }
 
     static #valid_length(str, conds) {
+        if (!str) return false
+
         if (conds.maximum) {
             return str.length <= conds.maximum
         }
