@@ -78,6 +78,12 @@ class User extends RecordBase {
             this.errors.push("password confirmation doesn't match password")
         }
 
+        // password length
+        if (!User.#valid_length(this.password, { minimum: 6 })) {
+            v = false
+            this.errors.push("password confirmation doesn't match password")
+        }
+
         if (v) this.errors = undefined
         return v
     }
@@ -235,6 +241,9 @@ class User extends RecordBase {
     static #valid_length(str, conds) {
         if (conds.maximum) {
             return str.length <= conds.maximum
+        }
+        if (conds.minimum) {
+            return conds.minimum <= str.length
         }
         return true
     }

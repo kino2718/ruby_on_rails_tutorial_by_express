@@ -71,6 +71,18 @@ describe('user model test', () => {
         expect(await duplicateUser.validAsync()).toBe(false)
     })
 
+    test('password should be present (nonblank)', () => {
+        user.password = user.password_confirmation = ' '.repeat(6)
+        expect(user.valid()).toBe(false)
+    })
+
+    test('password should have a minimum length', () => {
+        user.password = user.password_confirmation = 'a'.repeat(5)
+        expect(user.valid()).toBe(false)
+        user.password = user.password_confirmation = 'a'.repeat(6)
+        expect(user.valid()).toBe(true)
+    })
+
     const knex_utils = require('../../app/db/knex_utils')
     const knex = knex_utils.knex
 
