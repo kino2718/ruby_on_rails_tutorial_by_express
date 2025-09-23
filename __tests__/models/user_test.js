@@ -69,6 +69,7 @@ describe('user model test', () => {
         duplicateUser.email = user.email.toUpperCase()
         await user.save()
         expect(await duplicateUser.validAsync()).toBe(false)
+        await user.destroy() // データベースからuserを削除
     })
 
     test('password should be present (nonblank)', () => {
