@@ -9,8 +9,8 @@
     "start": "node app/server.js",
     "dev": "NODE_ENV=development DEBUG=express:* nodemon app/server.js",
     "start:watch": "nodemon app.js",
-    "test": "knex migrate:latest --env test && NODE_ENV=test jest; rm -f ./test.sqlite3",
-    "test:watch": "knex migrate:latest --env test && NODE_ENV=test jest --watch; rm -f ./test.sqlite3",
+    "test": "knex migrate:latest --env test && NODE_ENV=test jest; rm -f ./db/test.sqlite3",
+    "test:watch": "knex migrate:latest --env test && NODE_ENV=test jest --watch; rm -f ./db/test.sqlite3",
     "build:css": "sass --load-path=node_modules app/assets/stylesheets/application.scss app/assets/stylesheets/application.css --style=compressed",
     "watch:css": "sass --watch --load-path=node_modules app/assets/stylesheets/application.scss:app/assets/stylesheets/application.css --style=compressed",
     "migrate:latest:dev": "knex migrate:latest --env development",
@@ -18,7 +18,7 @@
     "migrate:latest:prod": "knex migrate:latest --env production",
     "migrate:rollback:prod": "knex migrate:rollback --env production",
     "console": "NODE_ENV=development node -i -r ./setup_console.js",
-    "console:sandbox": "SQLITE_FILENAME=./tmp.sqlite3 knex migrate:latest --env development && NODE_ENV=development SQLITE_FILENAME=./tmp.sqlite3 node -i -r ./setup_console.js; rm -f ./tmp.sqlite3"
+    "console:sandbox": "SQLITE_FILENAME=./db/tmp.sqlite3 knex migrate:latest --env development && NODE_ENV=development SQLITE_FILENAME=./db/tmp.sqlite3 node -i -r ./setup_console.js; rm -f ./db/tmp.sqlite3"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

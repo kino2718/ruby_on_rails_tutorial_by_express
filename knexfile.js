@@ -25,7 +25,7 @@ module.exports = {
   test: {
     client: 'sqlite3',
     connection: {
-      filename: './test.sqlite3',
+      filename: './db/test.sqlite3',
     },
     useNullAsDefault: true, // SQLite の警告回避
     pool: {
