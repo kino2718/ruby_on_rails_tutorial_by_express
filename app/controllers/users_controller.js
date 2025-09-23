@@ -6,7 +6,7 @@ router.get('/signup', (req, res) => {
 })
 
 function new_user(req, res) {
-    res.render('users/new', { title: 'Sign up' })
+    res.render('users/new', { title: 'Sign up', debugOutput: req.debugOutput })
 }
 
 module.exports = {

@@ -14,6 +14,13 @@ app.set('view engine', 'ejs')
 // set the root directory of static assets
 app.use(express.static(path.join(__dirname, 'assets')))
 
+// set debugOutput to the req
+app.use((req, res, next) => {
+    // 処理を追加
+    req.debugOutput = application_helper.getDebugOutput(req)
+    next()
+})
+
 // register helper functions
 app.locals.full_title = application_helper.full_title
 

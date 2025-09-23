@@ -18,19 +18,19 @@ router.get('/contact', (req, res) => {
 })
 
 function home(req, res) {
-    res.render('static_pages/home', { title: undefined })
+    res.render('static_pages/home', { title: undefined, debugOutput: req.debugOutput })
 }
 
 function help(req, res) {
-    res.render('static_pages/help', { title: 'Help' })
+    res.render('static_pages/help', { title: 'Help', debugOutput: req.debugOutput })
 }
 
 function about(req, res) {
-    res.render('static_pages/about', { title: 'About' })
+    res.render('static_pages/about', { title: 'About', debugOutput: req.debugOutput })
 }
 
 function contact(req, res) {
-    res.render('static_pages/contact', { title: 'Contact' })
+    res.render('static_pages/contact', { title: 'Contact', debugOutput: req.debugOutput })
 }
 
 module.exports = {
