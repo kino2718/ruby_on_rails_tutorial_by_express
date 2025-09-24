@@ -205,7 +205,6 @@ class User extends RecordBase {
         return { name: this.name, email: this.email, password_digest: hash }
     }
 
-
     async reload() {
         if (this.persisted) {
             await this.#reload(this.id)
@@ -267,7 +266,8 @@ class User extends RecordBase {
 
     static async find(id) {
         try {
-            return knex('users').select('*').where('id', id).first()
+            const obj = await knex('users').select('*').where('id', id).first()
+            return User.#dbToUserObject(obj)
         } catch (e) {
             console.error(e)
             return null
@@ -276,7 +276,8 @@ class User extends RecordBase {
 
     static async findBy(params = {}) {
         try {
-            return knex('users').select('*').where(params)
+            const li = await knex('users').select('*').where(params)
+            return li.map(o => User.#dbToUserObject(o))
         } catch (e) {
             console.error(e)
             return null
@@ -284,11 +285,39 @@ class User extends RecordBase {
     }
 
     static async first() {
-        return knex('users').select('*').orderBy('id', 'asc').limit(1).first()
+        try {
+            const obj = await knex('users').select('*').orderBy('id', 'asc').limit(1).first()
+            return User.#dbToUserObject(obj)
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
+    static #dbToUserObject(obj) {
+        if (obj) {
+            const u = new User()
+            u.id = obj.id
+            u.name = obj.name
+            u.email = obj.email
+            u.created_at = obj.created_at
+            u.updated_at = obj.updated_at
+            u.#password_digest = obj.password_digest
+            u.setSaved() // このidのuserは既にdbに存在するため
+            return u
+        } else {
+            return null
+        }
     }
 
     static async all() {
-        return knex('users').select('*').orderBy('id', 'asc')
+        try {
+            const li = await knex('users').select('*').orderBy('id', 'asc')
+            return li.map(o => User.#dbToUserObject(o))
+        } catch (e) {
+            console.error(e)
+            return null
+        }
     }
 
     static async count() {
