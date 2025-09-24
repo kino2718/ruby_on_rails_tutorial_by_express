@@ -3,6 +3,7 @@ const path = require('path')
 const static_pages_controller = require('./controllers/static_pages_controller')
 const users_controller = require('./controllers/users_controller')
 const application_helper = require('./helpers/application_helper')
+const users_helper = require('./helpers/users_helper')
 
 const app = express()
 
@@ -23,6 +24,7 @@ app.use((req, res, next) => {
 
 // register helper functions
 app.locals.full_title = application_helper.full_title
+app.locals.gravatar_for = users_helper.gravatar_for
 
 // use express.Router
 app.use('/', static_pages_controller.router)

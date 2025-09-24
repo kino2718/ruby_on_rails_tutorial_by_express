@@ -17,7 +17,7 @@ async function show(req, res) {
 
     const userId = req.params.userId
     const user = await User.find(userId)
-    res.render('users/show', { title: undefined, user: user, debugOutput: req.debugOutput })
+    res.render('users/show', { title: user.name, user: user, debugOutput: req.debugOutput })
 }
 
 module.exports = {
