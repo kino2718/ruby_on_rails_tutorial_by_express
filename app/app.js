@@ -26,6 +26,6 @@ app.locals.full_title = application_helper.full_title
 
 // use express.Router
 app.use('/', static_pages_controller.router)
-app.use('/', users_controller.router)
+app.use('/users', users_controller.router)
 
 module.exports = app

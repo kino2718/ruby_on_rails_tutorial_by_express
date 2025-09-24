@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const users_controller = require('./users_controller')
 
 router.get('/', (req, res) => {
     home(req, res)
@@ -15,6 +16,10 @@ router.get('/about', (req, res) => {
 
 router.get('/contact', (req, res) => {
     contact(req, res)
+})
+
+router.get('/signup', (req, res) => {
+    users_controller.new_user(req, res)
 })
 
 function home(req, res) {

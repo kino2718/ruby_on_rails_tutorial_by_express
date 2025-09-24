@@ -291,6 +291,12 @@ class User extends RecordBase {
         return knex('users').select('*').orderBy('id', 'asc')
     }
 
+    static async count() {
+        const { count } = await knex('users').count('* as count').first()
+        // 文字列の可能性があるので Number に変換
+        return Number(count);
+    }
+
     static #presence(str) {
         return (str && str.trim())
     }
