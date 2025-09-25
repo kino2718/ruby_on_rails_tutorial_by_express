@@ -1,5 +1,13 @@
 @import "bootstrap/scss/bootstrap";
 
+/* mixins, variables, etc. */
+
+@mixin box_sizing {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
 /* universal */
 
 body {
@@ -113,4 +121,18 @@ footer {
   margin-top: 45px;
   color: red;
   background-color: #ffe5e5;
+}
+
+/* forms */
+
+input,
+textarea {
+  border: 1px solid #bbb;
+  width: 100%;
+  margin-bottom: 15px;
+  @include box_sizing;
+}
+
+input {
+  height: auto !important;
 }

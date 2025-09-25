@@ -1,6 +1,27 @@
 <%- include('../layouts/header'); -%>
 
     <h1>Sign up</h1>
-    <p>This will be a signup page for new users.</p>
+
+    <div class="row">
+        <div class="col-md-6 offset-3">
+            <form action="/users" accept-charset="UTF-8" method="post">
+                <!-- <input type="hidden" name="authenticity_token"
+                    value="ここにCSRF対策のtokenを入れる。今は実装しない。" autocomplete="off" /> -->
+                <label for="user_name">Name</label>
+                <input type="text" name="user[name]" id="user_name" />
+
+                <label for="user_email">Email</label>
+                <input type="email" name="user[email]" id="user_email" />
+
+                <label for="user_password">Password</label>
+                <input type="password" name="user[password]" id="user_password" />
+
+                <label for="user_password_confirmation">Confirmation</label>
+                <input type="password" name="user[password_confirmation]" id="user_password_confirmation" />
+
+                <input type="submit" name="commit" value="Create my account" class="btn btn-primary" />
+            </form>
+        </div>
+    </div>
 
 <%- include('../layouts/footer'); -%>
