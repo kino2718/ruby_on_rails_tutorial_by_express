@@ -1,0 +1,13 @@
+<% if (user.errors) { %>
+    <div id="error_explanation">
+        <div class="alert alert-danger">
+            <% const count = user.errors.length %>
+            The form contains <%= count %> <%= count === 1 ? 'error' : 'errors' %>.
+        </div>
+        <ul>
+            <% user.errors.forEach( msg => { %>
+                <li><%= msg %></li>
+            <% }) %>
+        </ul>
+    </div>
+<% } %>
