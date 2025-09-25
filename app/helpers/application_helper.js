@@ -15,7 +15,7 @@ function getDebugOutput(req) {
     if (req.method && 0 < req.method.length) p.method = req.method
     if (req.url && 0 < req.url.length) p.url = req.url
     if (req.query && 0 < Object.keys(req.query).length) p.query = _normalize(req.query)
-    if (req.body && 0 < req.body.length) p.body = req.body
+    if (req.body && 0 < Object.keys(req.body).length) p.body = req.body
     return util.inspect(p, { depth: null, colors: false })
 }
 

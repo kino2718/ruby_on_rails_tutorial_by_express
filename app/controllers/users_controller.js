@@ -7,6 +7,10 @@ router.get('/:userId', async (req, res) => {
     await show(req, res)
 })
 
+router.post('/', async (req, res) => {
+    await create(req, res)
+})
+
 async function show(req, res) {
     const debugOutputParams = application_helper.getDebugOutputParams(req)
     if (debugOutputParams) req.debugOutput += `, ${debugOutputParams}`
@@ -19,6 +23,18 @@ async function show(req, res) {
 function new_user(req, res) {
     const user = new User()
     res.render('users/new', { title: 'Sign up', user: user, debugOutput: req.debugOutput })
+}
+
+async function create(req, res) {
+    const userParams = req.body.user
+    const user = new User(userParams)
+    if (await user.save()) {
+        // 保存の成功をここで扱う。
+        console.log('user saved successfully')
+    } else {
+        console.error('error: ', user.errors)
+        res.status(422).render('users/new', { title: 'Sign up', user: user, debugOutput: req.debugOutput })
+    }
 }
 
 module.exports = {

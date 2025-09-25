@@ -15,6 +15,9 @@ app.set('view engine', 'ejs')
 // set the root directory of static assets
 app.use(express.static(path.join(__dirname, 'assets')))
 
+// フォームのPOSTデータを受け取るための設定
+app.use(express.urlencoded({ extended: true }))  // x-www-form-urlencoded形式
+
 // set debugOutput to the req
 app.use((req, res, next) => {
     // 処理を追加
