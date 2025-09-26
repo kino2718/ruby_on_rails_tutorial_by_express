@@ -1,9 +1,9 @@
-const crypto = require("crypto")
+const crypto = require('crypto')
 const ejs = require('ejs')
 
-function gravatar_for(user) {
+function gravatarFor(user) {
     const email = user.email.toLowerCase()
-    const gravatar_id = crypto.createHash("md5").update(email).digest("hex")
+    const gravatar_id = crypto.createHash('md5').update(email).digest('hex')
     const gravatar_url = `https://secure.gravatar.com/avatar/${gravatar_id}`
     return `<img class="gravatar" src="${gravatar_url}" alt="${user.name}" />`
 }
@@ -61,7 +61,7 @@ function makeFormInput(user, prop, type, name, id) {
 }
 
 module.exports = {
-    gravatar_for,
+    gravatarFor,
     makeFormLabel,
     makeFormInput,
 }
