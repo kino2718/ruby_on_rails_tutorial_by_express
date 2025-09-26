@@ -4,6 +4,7 @@ const static_pages_controller = require('./controllers/static_pages_controller')
 const users_controller = require('./controllers/users_controller')
 const application_helper = require('./helpers/application_helper')
 const users_helper = require('./helpers/users_helper')
+const session = require('express-session')
 
 const app = express()
 
@@ -14,6 +15,19 @@ app.set('view engine', 'ejs')
 
 // set the root directory of static assets
 app.use(express.static(path.join(__dirname, 'assets')))
+
+// session の設定
+app.use(session({
+    secret: process.env.SESSION_SECRET, // セッションIDをハッシュ化するための秘密鍵（必須）
+    resave: false,                      // セッションに変更がなくても保存するか（false推奨）
+    saveUninitialized: false,           // 初期化されていないセッションも保存するか（通常false）
+    cookie: {
+        secure: false,                  // HTTPSのみでcookieを送信する場合true
+        httpOnly: true,                 // JSからアクセスできないようにする
+        // クロスサイトからのフォーム送信や画像リクエストには Cookie が送信されない。GETでは送信。GETでデータ削除等あると危険。
+        sameSite: 'lax',
+    }
+}))
 
 // フォームのPOSTデータを受け取るための設定
 app.use(express.urlencoded({ extended: true }))  // x-www-form-urlencoded形式
