@@ -28,6 +28,8 @@ app.use((req, res, next) => {
 // register helper functions
 app.locals.full_title = application_helper.full_title
 app.locals.gravatar_for = users_helper.gravatar_for
+app.locals.makeFormLabel = users_helper.makeFormLabel
+app.locals.makeFormInput = users_helper.makeFormInput
 
 // use express.Router
 app.use('/', static_pages_controller.router)

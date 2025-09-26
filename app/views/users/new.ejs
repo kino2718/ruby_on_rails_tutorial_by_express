@@ -10,17 +10,65 @@
 
                 <%- include('../shared/_error_messages'); -%>
 
-                <label for="user_name">Name</label>
-                <input class="form-control" type="text" name="user[name]" id="user_name" />
+                <%- makeFormLabel(
+                    user,
+                    'name',
+                    'user_name',
+                    'Name'
+                ) %>
 
-                <label for="user_email">Email</label>
-                <input class="form-control" type="email" name="user[email]" id="user_email" />
+                <%- makeFormInput(
+                    user,
+                    'name',
+                    'text',
+                    'user[name]',
+                    'user_name'
+                ) %>
 
-                <label for="user_password">Password</label>
-                <input class="form-control" type="password" name="user[password]" id="user_password" />
+                <%- makeFormLabel(
+                    user,
+                    'email',
+                    'user_email',
+                    'Email'
+                ) %>
 
-                <label for="user_password_confirmation">Confirmation</label>
-                <input class="form-control" type="password" name="user[password_confirmation]" id="user_password_confirmation" />
+                <%- makeFormInput(
+                    user,
+                    'email',
+                    'email',
+                    'user[email]',
+                    'user_email'
+                ) %>
+
+                <%- makeFormLabel(
+                    user,
+                    'password',
+                    'user_password',
+                    'Password'
+                ) %>
+
+                <%- makeFormInput(
+                    user,
+                    'password',
+                    'password',
+                    'user[password]',
+                    'user_password'
+                ) %>
+
+                <%- makeFormLabel(
+                    user,
+                    'password_confirmation',
+                    'user_password_confirmation',
+                    'Confirmation'
+                ) %>
+
+                <%- makeFormInput(
+                    user,
+                    'password_confirmation',
+                    'password',
+                    'user[password_confirmation]',
+                    'user_password_confirmation'
+                ) %>
 
                 <input type="submit" name="commit" value="Create my account" class="btn btn-primary" />
             </form>

@@ -65,61 +65,78 @@ class User extends RecordBase {
     }
 
     valid() {
-        this.errors = []
+        const props = []
+        const messages = []
         let v = true
         // name presence
         if (!User.#presence(this.name)) {
             v = false
-            this.errors.push("name can't be blank")
+            props.push('name')
+            messages.push("name can't be blank")
         }
         // name length
         if (!User.#valid_length(this.name, { maximum: 50 })) {
             v = false
-            this.errors.push('name is too long')
+            props.push('name')
+            messages.push('name is too long')
         }
 
         // email presence
         if (!User.#presence(this.email)) {
             v = false
-            this.errors.push("email can't be blank")
+            props.push('email')
+            messages.push("email can't be blank")
         }
         // email length
         if (!User.#valid_length(this.email, { maximum: 255 })) {
             v = false
-            this.errors.push('email is too long')
+            props.push('email')
+            messages.push('email is too long')
         }
         // email format
         const VALID_EMAIL_REGEX = /^[\w+\-.]+@[a-z\d\-.]+\.[a-z]+$/i
         if (!User.#valid_format(this.email, { with: VALID_EMAIL_REGEX })) {
             v = false
-            this.errors.push('email is invalid')
+            props.push('email')
+            messages.push('email is invalid')
         }
 
         // password presence
         if (!User.#presence(this.#password)) {
             v = false
-            this.errors.push("password can't be blank")
+            props.push('password')
+            messages.push("password can't be blank")
         }
 
         // password_confirmation presence
         if (!User.#presence(this.#password_confirmation)) {
             v = false
-            this.errors.push("password_confirmation can't be blank")
+            props.push('password_confirmation')
+            messages.push("password_confirmation can't be blank")
         }
 
         // password and password_confirmation must be equal
         if (this.#password !== this.#password_confirmation) {
             v = false
-            this.errors.push("password confirmation doesn't match password")
+            props.push('password_confirmation')
+            messages.push("password confirmation doesn't match password")
         }
 
         // password length
         if (!User.#valid_length(this.#password, { minimum: 6 })) {
             v = false
-            this.errors.push("password is too short")
+            props.push('password')
+            messages.push("password is too short")
         }
 
-        if (v) this.errors = undefined
+        if (v) {
+            this.errors = undefined
+        }
+        else {
+            this.errors = {}
+            this.errors.full_messages = messages
+            this.errors.props = props
+        }
         return v
     }
 
