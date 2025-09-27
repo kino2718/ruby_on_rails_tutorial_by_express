@@ -30,7 +30,9 @@ async function create(req, res) {
     const userParams = req.body.user
     const user = new User(userParams)
     if (await user.save()) {
-        // 保存の成功をここで扱う。
+        let baseUrl = req.baseUrl
+        if (baseUrl.at(-1) !== '/') baseUrl += '/'
+        res.redirect(`${baseUrl}${user.id}`)
     } else {
         res.status(422).render('users/new', { title: 'Sign up', user: user, debugOutput: req.debugOutput })
     }
