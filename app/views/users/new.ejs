@@ -5,8 +5,7 @@
     <div class="row">
         <div class="col-md-6 offset-3">
             <form action="/users" accept-charset="UTF-8" method="post">
-                <!-- <input type="hidden" name="authenticity_token"
-                    value="ここにCSRF対策のtokenを入れる。今は実装しない。" autocomplete="off" /> -->
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
 
                 <%- include('../shared/_error_messages'); -%>
 

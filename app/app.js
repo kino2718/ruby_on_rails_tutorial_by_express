@@ -6,6 +6,7 @@ const users_controller = require('./controllers/users_controller')
 const application_helper = require('./helpers/application_helper')
 const users_helper = require('./helpers/users_helper')
 const session = require('express-session')
+const csrfHelper = require('./helpers/csrf_helper')
 
 const app = express()
 
@@ -32,6 +33,9 @@ app.use(session({
 
 // フォームのPOSTデータを受け取るための設定
 app.use(express.urlencoded({ extended: true }))  // x-www-form-urlencoded形式
+
+// make csrf token
+app.use(csrfHelper.makeCsrfToken)
 
 // set debugOutput to the req
 app.use((req, res, next) => {

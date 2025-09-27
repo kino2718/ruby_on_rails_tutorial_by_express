@@ -2,12 +2,13 @@ const express = require('express')
 const router = express.Router()
 const User = require('../models/user')
 const application_helper = require('../helpers/application_helper')
+const csrfHelper = require('../helpers/csrf_helper')
 
 router.get('/:userId', async (req, res) => {
     await show(req, res)
 })
 
-router.post('/', async (req, res) => {
+router.post('/', csrfHelper.verifyCsrfToken, async (req, res) => {
     await create(req, res)
 })
 
