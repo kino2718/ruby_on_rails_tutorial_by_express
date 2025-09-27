@@ -1,3 +1,4 @@
+require('dotenv').config() // 環境変数の設定
 const express = require('express')
 const path = require('path')
 const static_pages_controller = require('./controllers/static_pages_controller')
