@@ -348,12 +348,12 @@ class User extends RecordBase {
     }
 
     static #valid_length(str, conds) {
-        if (!str) return false
-
         if (conds.maximum) {
+            if (!str) return true
             return str.length <= conds.maximum
         }
         if (conds.minimum) {
+            if (!str) return false
             return conds.minimum <= str.length
         }
         return true
