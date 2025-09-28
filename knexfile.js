@@ -39,7 +39,7 @@ module.exports = {
 
   production: {
     client: 'pg',
-    // 未実装とする。Renderへdeployする時に設定する。
+    connection: process.env.DATABASE_URL,
     ...shared,
   },
 };
