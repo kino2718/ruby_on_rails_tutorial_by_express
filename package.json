@@ -15,6 +15,7 @@
     "watch:css": "sass --watch --load-path=node_modules app/assets/stylesheets/application.scss:app/assets/stylesheets/application.css --style=compressed",
     "migrate:latest:dev": "knex migrate:latest --env development",
     "migrate:rollback:dev": "knex migrate:rollback --env development",
+    "migrate:reset:dev": "knex migrate:rollback --all --env development && npx knex migrate:latest --env development",
     "migrate:latest:prod": "knex migrate:latest --env production",
     "migrate:rollback:prod": "knex migrate:rollback --env production",
     "console": "NODE_ENV=development node -i -r ./setup_console.js",
