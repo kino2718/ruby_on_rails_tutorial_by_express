@@ -1,8 +1,15 @@
 <%- include('../layouts/header'); -%>
 
-    <h1>
-        <%- gravatarFor(user) %>
-        <%= user.name %>
-    </h1>
+<div class="row">
+  <aside class="col-md-4">
+    <section class="user_info">
+        <h1>
+            <%- gravatarFor(user) %>
+            <%= user.name %>
+        </h1>
+      </h1>
+    </section>
+  </aside>
+</div>
 
 <%- include('../layouts/footer'); -%>
