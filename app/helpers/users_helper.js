@@ -41,9 +41,10 @@ function makeFormInput(user, prop, type, name, id) {
     if (type) escapedType = ejs.render('type="<%= type %>"', { type: type })
 
     let escapedValue = ''
-    const val = user[prop]
-    const isPassword = type == 'password'
-    if (val && !isPassword) escapedValue = ejs.render('value="<%= val %>"', { val: val })
+    if (type !== 'password') {
+        const val = user[prop]
+        if (val) escapedValue = ejs.render('value="<%= val %>"', { val: val })
+    }
 
     let escapedName = ''
     if (name) escapedName = ejs.render('name="<%= name %>"', { name: name })

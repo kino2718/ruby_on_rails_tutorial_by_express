@@ -58,9 +58,6 @@ class User extends RecordBase {
     }
 
     get password_digest() {
-        if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
-            throw new Error("Accessing password is not allowed outside development or test!");
-        }
         return this.#password_digest
     }
 
