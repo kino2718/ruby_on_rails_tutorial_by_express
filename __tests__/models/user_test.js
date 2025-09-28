@@ -10,78 +10,78 @@ describe('user model test', () => {
         })
     });
 
-    test('should be valid', () => {
-        expect(user.valid()).toBe(true)
+    test('should be valid', async () => {
+        expect(await user.valid()).toBe(true)
     })
 
-    test('name should be present', () => {
+    test('name should be present', async () => {
         user.name = ''
-        expect(user.valid()).toBe(false)
+        expect(await user.valid()).toBe(false)
     })
 
-    test('email should be present', () => {
+    test('email should be present', async () => {
         user.email = '     '
-        expect(user.valid()).toBe(false)
+        expect(await user.valid()).toBe(false)
     })
 
-    test('name should not be too long', () => {
+    test('name should not be too long', async () => {
         user.name = 'a'.repeat(50)
-        expect(user.valid()).toBe(true)
+        expect(await user.valid()).toBe(true)
         user.name = 'a'.repeat(51)
-        expect(user.valid()).toBe(false)
+        expect(await user.valid()).toBe(false)
     })
 
-    test('email should not be too long', () => {
+    test('email should not be too long', async () => {
         user.email = 'a'.repeat(243) + '@example.com'
-        expect(user.valid()).toBe(true)
+        expect(await user.valid()).toBe(true)
         user.email = 'a'.repeat(244) + '@example.com'
-        expect(user.valid()).toBe(false)
+        expect(await user.valid()).toBe(false)
     })
 
-    test('email validation should accept valid addresses', () => {
+    test('email validation should accept valid addresses', async () => {
         const validAddresses = ['user@example.com', 'USER@foo.COM', 'A_US-ER@foo.bar.org', 'first.last@foo.jp', 'alice+bob@baz.cn']
-        validAddresses.forEach(validAddress => {
+        for (const validAddress of validAddresses) {
             user.email = validAddress
             try {
-                expect(user.valid()).toBe(true)
+                expect(await user.valid()).toBe(true)
             } catch (e) {
                 console.log(`${validAddress} should be valid`)
                 throw e
             }
-        })
+        }
     })
 
-    test('email validation should reject invalid addresses', () => {
+    test('email validation should reject invalid addresses', async () => {
         const invalidAddresses = ['user@example,com', 'user_at_foo.org', 'user.name@example.', 'foo@bar_baz.com', 'foo@bar+baz.com']
-        invalidAddresses.forEach(invalidAddress => {
+        for (const invalidAddress of invalidAddresses) {
             user.email = invalidAddress
             try {
-                expect(user.valid()).toBe(false)
+                expect(await user.valid()).toBe(false)
             } catch (e) {
                 console.log(`${invalidAddress} should be invalid`)
                 throw e
             }
-        })
+        }
     })
 
     test('email addresses should be unique', async () => {
         const duplicateUser = user.dup()
         duplicateUser.email = user.email.toUpperCase()
         await user.save()
-        expect(await duplicateUser.validAsync()).toBe(false)
+        expect(await duplicateUser.valid()).toBe(false)
         await user.destroy() // データベースからuserを削除
     })
 
-    test('password should be present (nonblank)', () => {
+    test('password should be present (nonblank)', async () => {
         user.password = user.password_confirmation = ' '.repeat(6)
-        expect(user.valid()).toBe(false)
+        expect(await user.valid()).toBe(false)
     })
 
-    test('password should have a minimum length', () => {
+    test('password should have a minimum length', async () => {
         user.password = user.password_confirmation = 'a'.repeat(5)
-        expect(user.valid()).toBe(false)
+        expect(await user.valid()).toBe(false)
         user.password = user.password_confirmation = 'a'.repeat(6)
-        expect(user.valid()).toBe(true)
+        expect(await user.valid()).toBe(true)
     })
 
     const knex_utils = require('../../app/db/knex_utils')
