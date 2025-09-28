@@ -30,6 +30,10 @@ async function create(req, res) {
     const userParams = req.body.user
     const user = new User(userParams)
     if (await user.save()) {
+        // flashの設定
+        req.flash('success', 'Welcome to the Sample App!')
+
+        // ユーザ画面にredirectする
         let baseUrl = req.baseUrl
         if (baseUrl.at(-1) !== '/') baseUrl += '/'
         res.redirect(`${baseUrl}${user.id}`)

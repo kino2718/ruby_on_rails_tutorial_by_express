@@ -15,6 +15,7 @@ JavaScript と Express で実装した Web アプリです。
 -   express_session: セッション管理用。
 -   csrf: CSRF 対策用。
 -   dotenv: 環境変数用。
+-   connect-flash: flash 表示用。
 
 ## ローカルでの使い方
 

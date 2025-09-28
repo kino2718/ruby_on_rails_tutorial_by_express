@@ -7,6 +7,7 @@ const application_helper = require('./helpers/application_helper')
 const users_helper = require('./helpers/users_helper')
 const session = require('express-session')
 const csrfHelper = require('./helpers/csrf_helper')
+const flash = require('connect-flash')
 
 const app = express()
 
@@ -30,6 +31,13 @@ app.use(session({
         sameSite: 'lax',
     }
 }))
+
+// flash の設定
+app.use(flash())
+app.use((req, res, next) => {
+  res.locals.flash = req.flash()
+  next()
+})
 
 // フォームのPOSTデータを受け取るための設定
 app.use(express.urlencoded({ extended: true }))  // x-www-form-urlencoded形式

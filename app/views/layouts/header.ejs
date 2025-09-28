@@ -24,3 +24,8 @@
         </div>
     </header>
     <div class="container">
+        <% Object.keys(flash).forEach(type => { %>
+            <% flash[type].forEach(msg => { %>
+                <div class="alert alert-<%= type %>"><%= msg %></div>
+            <% }) %>
+        <% }) %>
