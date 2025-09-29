@@ -1,4 +1,4 @@
-<%- include('../layouts/header'); -%>
+<%- include('../layouts/header') -%>
 
     <h1>Sign up</h1>
 
@@ -7,7 +7,7 @@
             <form action="/users" accept-charset="UTF-8" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
 
-                <%- include('../shared/_error_messages'); -%>
+                <%- include('../shared/_error_messages') -%>
 
                 <%- makeFormLabel(
                     user,
@@ -74,4 +74,4 @@
         </div>
     </div>
 
-<%- include('../layouts/footer'); -%>
+<%- include('../layouts/footer') -%>

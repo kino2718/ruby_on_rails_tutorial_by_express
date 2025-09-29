@@ -31,28 +31,28 @@ class User extends RecordBase {
     // デバッグやテスト用に定義しておく
     get password() {
         if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
-            throw new Error("Accessing password is not allowed outside development or test!");
+            throw new Error("Accessing password is not allowed outside development or test!")
         }
         return this.#password
     }
 
     set password(p) {
         if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
-            throw new Error("Accessing password is not allowed outside development or test!");
+            throw new Error("Accessing password is not allowed outside development or test!")
         }
         this.#password = p
     }
 
     get passwordConfirmation() {
         if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
-            throw new Error("Accessing password is not allowed outside development or test!");
+            throw new Error("Accessing password is not allowed outside development or test!")
         }
         return this.#passwordConfirmation
     }
 
     set passwordConfirmation(p) {
         if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
-            throw new Error("Accessing password is not allowed outside development or test!");
+            throw new Error("Accessing password is not allowed outside development or test!")
         }
         this.#passwordConfirmation = p
     }
@@ -330,7 +330,7 @@ class User extends RecordBase {
     static async count() {
         const { count } = await knex('users').count('* as count').first()
         // 文字列の可能性があるので Number に変換
-        return Number(count);
+        return Number(count)
     }
 
     static #presence(str) {

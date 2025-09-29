@@ -89,6 +89,6 @@ describe('users signup test', () => {
     const knex = knexUtils.knex
 
     afterAll(async () => {
-        await knex.destroy();   // コネクションを閉じる
+        await knex.destroy() // コネクションを閉じる
     })
 })

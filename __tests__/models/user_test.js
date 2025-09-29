@@ -8,7 +8,7 @@ describe('user model test', () => {
             name: 'Example User', email: 'user@example.com',
             password: 'foobar', passwordConfirmation: 'foobar'
         })
-    });
+    })
 
     test('should be valid', async () => {
         expect(await user.valid()).toBe(true)
@@ -88,6 +88,6 @@ describe('user model test', () => {
     const knex = knexUtils.knex
 
     afterAll(async () => {
-        await knex.destroy();   // コネクションを閉じる
-    });
+        await knex.destroy() // コネクションを閉じる
+    })
 })

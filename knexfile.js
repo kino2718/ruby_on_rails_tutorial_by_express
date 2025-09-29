@@ -3,7 +3,7 @@ const shared = {
     tableName: 'knex_migrations',
     directory: './db/migrate', // Ruby on Rails Tutorialに合わせる。
   },
-};
+}
 
 module.exports = {
   development: {
@@ -15,7 +15,7 @@ module.exports = {
     pool: {
       afterCreate: (conn, cb) => {
         // 外部キーを有効化
-        conn.run('PRAGMA foreign_keys = ON', cb);
+        conn.run('PRAGMA foreign_keys = ON', cb)
       },
     },
     debug: true,
@@ -31,7 +31,7 @@ module.exports = {
     pool: {
       afterCreate: (conn, cb) => {
         // 外部キーを有効化
-        conn.run('PRAGMA foreign_keys = ON', cb);
+        conn.run('PRAGMA foreign_keys = ON', cb)
       },
     },
     ...shared,
@@ -42,4 +42,4 @@ module.exports = {
     connection: process.env.DATABASE_URL,
     ...shared,
   },
-};
+}
