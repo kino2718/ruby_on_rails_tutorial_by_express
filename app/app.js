@@ -3,6 +3,7 @@ const express = require('express')
 const path = require('path')
 const static_pages_controller = require('./controllers/static_pages_controller')
 const users_controller = require('./controllers/users_controller')
+const sessions_controller = require('./controllers/sessions_controller')
 const application_helper = require('./helpers/application_helper')
 const users_helper = require('./helpers/users_helper')
 const session = require('express-session')
@@ -62,5 +63,6 @@ app.locals.makeFormInput = users_helper.makeFormInput
 // use express.Router
 app.use('/', static_pages_controller.router)
 app.use('/users', users_controller.router)
+app.use('/', sessions_controller.router)
 
 module.exports = app
