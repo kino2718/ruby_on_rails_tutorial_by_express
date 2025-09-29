@@ -1,14 +1,5 @@
 const util = require('util')
 
-function full_title(page_title = '') {
-    const base_title = "Ruby on Rails Tutorial Sample App"
-    if (!page_title) {
-        return base_title
-    } else {
-        return `${page_title} | ${base_title}`
-    }
-}
-
 function getDebugOutput(req) {
     if (process.env.NODE_ENV !== 'development') return ''
     let p = {}
@@ -34,7 +25,6 @@ function _normalize(obj) {
 }
 
 module.exports = {
-    full_title,
     getDebugOutput,
     getDebugOutputParams,
 }

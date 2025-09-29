@@ -1,6 +1,16 @@
 const crypto = require('crypto')
 const ejs = require('ejs')
 
+function full_title(page_title = '') {
+    const base_title = "Ruby on Rails Tutorial Sample App"
+    if (!page_title) {
+        return base_title
+    } else {
+        return `${page_title} | ${base_title}`
+    }
+}
+
+
 function gravatarFor(user) {
     const email = user.email.toLowerCase()
     const gravatar_id = crypto.createHash('md5').update(email).digest('hex')
@@ -21,7 +31,7 @@ function errorSuffix(hasError) {
     else return ''
 }
 
-function makeFormLabel(user, prop, forWhat, contents) {
+function makeFormLabel(obj, prop, forWhat, contents) {
     let escapedFor = ''
     if (forWhat) escapedFor = ejs.render('for="<%= forWhat %>"', { forWhat: forWhat })
 
@@ -30,20 +40,20 @@ function makeFormLabel(user, prop, forWhat, contents) {
     const labelEl = `<label ${escapedFor}>` + escapedContents + '</label>'
 
     // user.propの値がvalidかどうか確認する。
-    const hasError = user && user.errors && user.errors.props && user.errors.props.includes(prop)
+    const hasError = obj && obj.errors && obj.errors.props && obj.errors.props.includes(prop)
 
     const res = errorPrefix(hasError) + labelEl + errorSuffix(hasError)
     return res
 }
 
-function makeFormInput(user, prop, type, name, id) {
+function makeFormInput(obj, prop, type, name, id) {
     let escapedType = ''
     if (type) escapedType = ejs.render('type="<%= type %>"', { type: type })
 
     let escapedValue = ''
     if (type !== 'password') {
-        if (user) {
-            const val = user[prop]
+        if (obj) {
+            const val = obj[prop]
             if (val) escapedValue = ejs.render('value="<%= val %>"', { val: val })
         }
     }
@@ -57,13 +67,14 @@ function makeFormInput(user, prop, type, name, id) {
     const inputEl = `<input class="form-control" ${escapedType} ${escapedValue} ${escapedName} ${escapedId} />`
 
     // user.propの値がvalidかどうか確認する。
-    const hasError = user && user.errors && user.errors.props && user.errors.props.includes(prop)
+    const hasError = obj && obj.errors && obj.errors.props && obj.errors.props.includes(prop)
 
     const res = errorPrefix(hasError) + inputEl + errorSuffix(hasError)
     return res
 }
 
 module.exports = {
+    full_title,
     gravatarFor,
     makeFormLabel,
     makeFormInput,

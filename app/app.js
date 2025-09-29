@@ -5,7 +5,7 @@ const static_pages_controller = require('./controllers/static_pages_controller')
 const users_controller = require('./controllers/users_controller')
 const sessions_controller = require('./controllers/sessions_controller')
 const application_helper = require('./helpers/application_helper')
-const users_helper = require('./helpers/users_helper')
+const templatesHelper = require('./helpers/templates_helper')
 const session = require('express-session')
 const csrfHelper = require('./helpers/csrf_helper')
 const flash = require('connect-flash')
@@ -55,10 +55,10 @@ app.use((req, res, next) => {
 })
 
 // register helper functions
-app.locals.full_title = application_helper.full_title
-app.locals.gravatarFor = users_helper.gravatarFor
-app.locals.makeFormLabel = users_helper.makeFormLabel
-app.locals.makeFormInput = users_helper.makeFormInput
+app.locals.full_title = templatesHelper.full_title
+app.locals.gravatarFor = templatesHelper.gravatarFor
+app.locals.makeFormLabel = templatesHelper.makeFormLabel
+app.locals.makeFormInput = templatesHelper.makeFormInput
 
 // use express.Router
 app.use('/', static_pages_controller.router)
