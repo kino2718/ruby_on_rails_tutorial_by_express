@@ -6,7 +6,7 @@ router.get('/login', (req, res) => {
 })
 
 function newSession(req, res) {
-    res.render('sessions/new', { title: undefined, debugOutput: req.debugOutput })
+    res.render('sessions/new')
 }
 
 module.exports = {

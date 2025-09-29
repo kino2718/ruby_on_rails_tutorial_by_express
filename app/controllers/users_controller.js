@@ -14,16 +14,16 @@ router.post('/', csrfHelper.verifyCsrfToken, async (req, res) => {
 
 async function show(req, res) {
     const debugOutputParams = application_helper.getDebugOutputParams(req)
-    if (debugOutputParams) req.debugOutput += `, ${debugOutputParams}`
+    if (debugOutputParams) res.locals.debugOutput += `, ${debugOutputParams}`
 
     const userId = req.params.userId
     const user = await User.find(userId)
-    res.render('users/show', { title: user.name, user: user, debugOutput: req.debugOutput })
+    res.render('users/show', { title: user.name, user: user })
 }
 
 function new_user(req, res) {
     const user = new User()
-    res.render('users/new', { title: 'Sign up', user: user, debugOutput: req.debugOutput })
+    res.render('users/new', { title: 'Sign up', user: user })
 }
 
 async function create(req, res) {
@@ -38,7 +38,7 @@ async function create(req, res) {
         if (baseUrl.at(-1) !== '/') baseUrl += '/'
         res.redirect(`${baseUrl}${user.id}`)
     } else {
-        res.status(422).render('users/new', { title: 'Sign up', user: user, debugOutput: req.debugOutput })
+        res.status(422).render('users/new', { title: 'Sign up', user: user })
     }
 }
 

@@ -37,8 +37,8 @@ app.use(session({
 // flash の設定
 app.use(flash())
 app.use((req, res, next) => {
-  res.locals.flash = req.flash()
-  next()
+    res.locals.flash = req.flash()
+    next()
 })
 
 // フォームのPOSTデータを受け取るための設定
@@ -47,10 +47,10 @@ app.use(express.urlencoded({ extended: true }))  // x-www-form-urlencoded形式
 // make csrf token
 app.use(csrfHelper.makeCsrfToken)
 
-// set debugOutput to the req
+// set some variables to the res.locals
 app.use((req, res, next) => {
-    // 処理を追加
-    req.debugOutput = application_helper.getDebugOutput(req)
+    res.locals.title = undefined
+    res.locals.debugOutput = application_helper.getDebugOutput(req)
     next()
 })
 

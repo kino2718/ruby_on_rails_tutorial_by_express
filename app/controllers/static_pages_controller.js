@@ -23,19 +23,19 @@ router.get('/signup', (req, res) => {
 })
 
 function home(req, res) {
-    res.render('static_pages/home', { title: undefined, debugOutput: req.debugOutput })
+    res.render('static_pages/home')
 }
 
 function help(req, res) {
-    res.render('static_pages/help', { title: 'Help', debugOutput: req.debugOutput })
+    res.render('static_pages/help', { title: 'Help' })
 }
 
 function about(req, res) {
-    res.render('static_pages/about', { title: 'About', debugOutput: req.debugOutput })
+    res.render('static_pages/about', { title: 'About' })
 }
 
 function contact(req, res) {
-    res.render('static_pages/contact', { title: 'Contact', debugOutput: req.debugOutput })
+    res.render('static_pages/contact', { title: 'Contact' })
 }
 
 module.exports = {
