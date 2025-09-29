@@ -6,7 +6,7 @@ describe('user model test', () => {
     beforeEach(() => {
         user = new User({
             name: 'Example User', email: 'user@example.com',
-            password: 'foobar', password_confirmation: 'foobar'
+            password: 'foobar', passwordConfirmation: 'foobar'
         })
     });
 
@@ -73,19 +73,19 @@ describe('user model test', () => {
     })
 
     test('password should be present (nonblank)', async () => {
-        user.password = user.password_confirmation = ' '.repeat(6)
+        user.password = user.passwordConfirmation = ' '.repeat(6)
         expect(await user.valid()).toBe(false)
     })
 
     test('password should have a minimum length', async () => {
-        user.password = user.password_confirmation = 'a'.repeat(5)
+        user.password = user.passwordConfirmation = 'a'.repeat(5)
         expect(await user.valid()).toBe(false)
-        user.password = user.password_confirmation = 'a'.repeat(6)
+        user.password = user.passwordConfirmation = 'a'.repeat(6)
         expect(await user.valid()).toBe(true)
     })
 
-    const knex_utils = require('../../app/db/knex_utils')
-    const knex = knex_utils.knex
+    const knexUtils = require('../../app/db/knex_utils')
+    const knex = knexUtils.knex
 
     afterAll(async () => {
         await knex.destroy();   // コネクションを閉じる

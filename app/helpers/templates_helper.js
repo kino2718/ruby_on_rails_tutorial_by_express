@@ -1,21 +1,21 @@
 const crypto = require('crypto')
 const ejs = require('ejs')
 
-function full_title(page_title = '') {
-    const base_title = "Ruby on Rails Tutorial Sample App"
-    if (!page_title) {
-        return base_title
+function fullTitle(pageTitle = '') {
+    const baseTitle = "Ruby on Rails Tutorial Sample App"
+    if (!pageTitle) {
+        return baseTitle
     } else {
-        return `${page_title} | ${base_title}`
+        return `${pageTitle} | ${baseTitle}`
     }
 }
 
 
 function gravatarFor(user) {
     const email = user.email.toLowerCase()
-    const gravatar_id = crypto.createHash('md5').update(email).digest('hex')
-    const gravatar_url = `https://secure.gravatar.com/avatar/${gravatar_id}`
-    return `<img class="gravatar" src="${gravatar_url}" alt="${user.name}" />`
+    const gravatarId = crypto.createHash('md5').update(email).digest('hex')
+    const gravatarUrl = `https://secure.gravatar.com/avatar/${gravatarId}`
+    return `<img class="gravatar" src="${gravatarUrl}" alt="${user.name}" />`
 }
 
 const ERROR_PREFIX = '<div class="field_with_errors">'
@@ -74,7 +74,7 @@ function makeFormInput(obj, prop, type, name, id) {
 }
 
 module.exports = {
-    full_title,
+    fullTitle,
     gravatarFor,
     makeFormLabel,
     makeFormInput,

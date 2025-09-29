@@ -1,10 +1,10 @@
 require('dotenv').config() // 環境変数の設定
 const express = require('express')
 const path = require('path')
-const static_pages_controller = require('./controllers/static_pages_controller')
-const users_controller = require('./controllers/users_controller')
-const sessions_controller = require('./controllers/sessions_controller')
-const application_helper = require('./helpers/application_helper')
+const staticPagesController = require('./controllers/static_pages_controller')
+const usersController = require('./controllers/users_controller')
+const sessionsController = require('./controllers/sessions_controller')
+const applicationHelper = require('./helpers/application_helper')
 const templatesHelper = require('./helpers/templates_helper')
 const session = require('express-session')
 const csrfHelper = require('./helpers/csrf_helper')
@@ -50,19 +50,19 @@ app.use(csrfHelper.makeCsrfToken)
 // set some variables to the res.locals
 app.use((req, res, next) => {
     res.locals.title = undefined
-    res.locals.debugOutput = application_helper.getDebugOutput(req)
+    res.locals.debugOutput = applicationHelper.getDebugOutput(req)
     next()
 })
 
 // register helper functions
-app.locals.full_title = templatesHelper.full_title
+app.locals.fullTitle = templatesHelper.fullTitle
 app.locals.gravatarFor = templatesHelper.gravatarFor
 app.locals.makeFormLabel = templatesHelper.makeFormLabel
 app.locals.makeFormInput = templatesHelper.makeFormInput
 
 // use express.Router
-app.use('/', static_pages_controller.router)
-app.use('/users', users_controller.router)
-app.use('/', sessions_controller.router)
+app.use('/', staticPagesController.router)
+app.use('/users', usersController.router)
+app.use('/', sessionsController.router)
 
 module.exports = app

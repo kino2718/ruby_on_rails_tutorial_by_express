@@ -1,6 +1,6 @@
-const knex_utils = require('../db/knex_utils')
-const knex = knex_utils.knex
-const debugLog = knex_utils.debugLog
+const knexUtils = require('../db/knex_utils')
+const knex = knexUtils.knex
+const debugLog = knexUtils.debugLog
 const bcrypt = require('bcryptjs')
 const RecordBase = require('./record_base')
 
@@ -14,17 +14,17 @@ class User extends RecordBase {
     // 以下password関連のpropertyはprivateとする。これでログ等には出力されなくなる。
     // デバッグ用にgetter methodを定義しておく
     #password
-    #password_confirmation
-    #password_digest
-    created_at // 自動で割り振られる
-    updated_at // 自動で割り振られる
+    #passwordConfirmation
+    #passwordDigest
+    createdAt // 自動で割り振られる
+    updatedAt // 自動で割り振られる
 
     constructor(params = {}) {
         super()
         this.name = params.name
         this.email = params.email
         this.#password = params.password
-        this.#password_confirmation = params.password_confirmation
+        this.#passwordConfirmation = params.passwordConfirmation
     }
 
     // password関連のpropertyのgetter, setter methods
@@ -43,22 +43,22 @@ class User extends RecordBase {
         this.#password = p
     }
 
-    get password_confirmation() {
+    get passwordConfirmation() {
         if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
             throw new Error("Accessing password is not allowed outside development or test!");
         }
-        return this.#password_confirmation
+        return this.#passwordConfirmation
     }
 
-    set password_confirmation(p) {
+    set passwordConfirmation(p) {
         if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
             throw new Error("Accessing password is not allowed outside development or test!");
         }
-        this.#password_confirmation = p
+        this.#passwordConfirmation = p
     }
 
-    get password_digest() {
-        return this.#password_digest
+    get passwordDigest() {
+        return this.#passwordDigest
     }
 
     async valid() {
@@ -72,7 +72,7 @@ class User extends RecordBase {
             messages.push("name can't be blank")
         }
         // name length
-        if (!User.#valid_length(this.name, { maximum: 50 })) {
+        if (!User.#validLength(this.name, { maximum: 50 })) {
             v = false
             props.push('name')
             messages.push('name is too long')
@@ -85,14 +85,14 @@ class User extends RecordBase {
             messages.push("email can't be blank")
         }
         // email length
-        if (!User.#valid_length(this.email, { maximum: 255 })) {
+        if (!User.#validLength(this.email, { maximum: 255 })) {
             v = false
             props.push('email')
             messages.push('email is too long')
         }
         // email format
         const VALID_EMAIL_REGEX = /^[\w+\-.]+@[a-z\d\-.]+\.[a-z]+$/i
-        if (!User.#valid_format(this.email, { with: VALID_EMAIL_REGEX })) {
+        if (!User.#validFormat(this.email, { with: VALID_EMAIL_REGEX })) {
             v = false
             props.push('email')
             messages.push('email is invalid')
@@ -105,22 +105,22 @@ class User extends RecordBase {
             messages.push("password can't be blank")
         }
 
-        // password_confirmation presence
-        if (!User.#presence(this.#password_confirmation)) {
+        // passwordConfirmation presence
+        if (!User.#presence(this.#passwordConfirmation)) {
             v = false
-            props.push('password_confirmation')
-            messages.push("password_confirmation can't be blank")
+            props.push('passwordConfirmation')
+            messages.push("password confirmation can't be blank")
         }
 
-        // password and password_confirmation must be equal
-        if (this.#password !== this.#password_confirmation) {
+        // password and passwordConfirmation must be equal
+        if (this.#password !== this.#passwordConfirmation) {
             v = false
-            props.push('password_confirmation')
+            props.push('passwordConfirmation')
             messages.push("password confirmation doesn't match password")
         }
 
         // password length
-        if (!User.#valid_length(this.#password, { minimum: 6 })) {
+        if (!User.#validLength(this.#password, { minimum: 6 })) {
             v = false
             props.push('password')
             messages.push("password is too short")
@@ -138,7 +138,7 @@ class User extends RecordBase {
         }
         else {
             this.errors = {}
-            this.errors.full_messages = messages
+            this.errors.fullMessages = messages
             this.errors.props = props
         }
         return v
@@ -164,7 +164,7 @@ class User extends RecordBase {
             if ('name' in params) this.name = params.name
             if ('email' in params) this.email = params.email
             if ('password' in params) this.#password = params.password
-            if ('password_confirmation' in params) this.#password_confirmation = params.password_confirmation
+            if ('passwordConfirmation' in params) this.#passwordConfirmation = params.passwordConfirmation
             if (!await this.valid()) return false
 
             return this.#update()
@@ -223,10 +223,10 @@ class User extends RecordBase {
         try {
             const u = await User.find(id)
             if (!u) return false
-            const password_digest = u.password_digest
-            delete u.password_digest
+            const passwordDigest = u.passwordDigest
+            delete u.passwordDigest
             Object.assign(this, u)
-            this.#password_digest = password_digest
+            this.#passwordDigest = passwordDigest
             return true
         } catch (e) {
             console.error(e)
@@ -235,8 +235,8 @@ class User extends RecordBase {
     }
 
     authenticate(password) {
-        if (!password || !this.#password_digest) return false
-        return bcrypt.compareSync(password, this.#password_digest)
+        if (!password || !this.#passwordDigest) return false
+        return bcrypt.compareSync(password, this.#passwordDigest)
     }
 
     dup() {
@@ -244,8 +244,8 @@ class User extends RecordBase {
         u.name = this.name
         u.email = this.email
         u.#password = this.#password
-        u.#password_confirmation = this.#password_confirmation
-        u.#password_digest = this.#password_digest
+        u.#passwordConfirmation = this.#passwordConfirmation
+        u.#passwordDigest = this.#passwordDigest
         return u
     }
 
@@ -307,9 +307,9 @@ class User extends RecordBase {
             u.id = obj.id
             u.name = obj.name
             u.email = obj.email
-            u.created_at = obj.created_at
-            u.updated_at = obj.updated_at
-            u.#password_digest = obj.password_digest
+            u.createdAt = obj.created_at
+            u.updatedAt = obj.updated_at
+            u.#passwordDigest = obj.password_digest
             u.setSaved() // このidのuserは既にdbに存在するため
             return u
         } else {
@@ -337,7 +337,7 @@ class User extends RecordBase {
         return (str && str.trim())
     }
 
-    static #valid_length(str, conds) {
+    static #validLength(str, conds) {
         if (conds.maximum) {
             if (!str) return true
             return str.length <= conds.maximum
@@ -349,7 +349,7 @@ class User extends RecordBase {
         return true
     }
 
-    static #valid_format(str, conds) {
+    static #validFormat(str, conds) {
         if (conds.with) {
             return conds.with.test(str)
         }

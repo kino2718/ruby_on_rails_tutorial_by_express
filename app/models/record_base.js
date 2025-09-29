@@ -1,5 +1,5 @@
-const knex_utils = require('../db/knex_utils')
-const knex = knex_utils.knex
+const knexUtils = require('../db/knex_utils')
+const knex = knexUtils.knex
 
 class RecordBase {
     #newRecord = true

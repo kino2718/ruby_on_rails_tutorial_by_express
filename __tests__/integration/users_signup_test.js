@@ -29,7 +29,7 @@ describe('users signup test', () => {
                 'user[name]': '',
                 'user[email]': 'user@invalid',
                 'user[password]': 'foo',
-                'user[password_confirmation]': 'bar'
+                'user[passwordConfirmation]': 'bar'
             })
         // ステータスコード (unprocessable_entity = 422)の確認
         expect(res.status).toBe(UNPROCESSABLE_ENTITY)
@@ -66,7 +66,7 @@ describe('users signup test', () => {
                 'user[name]': 'Example User',
                 'user[email]': 'user@example.com',
                 'user[password]': 'password',
-                'user[password_confirmation]': 'password'
+                'user[passwordConfirmation]': 'password'
             })
             .redirects(1) // redirect先を読み込む
         // ステータスコード (redirect 302)の確認
@@ -85,8 +85,8 @@ describe('users signup test', () => {
         if (users[0]) await users[0].destroy()
     })
 
-    const knex_utils = require('../../app/db/knex_utils')
-    const knex = knex_utils.knex
+    const knexUtils = require('../../app/db/knex_utils')
+    const knex = knexUtils.knex
 
     afterAll(async () => {
         await knex.destroy();   // コネクションを閉じる
