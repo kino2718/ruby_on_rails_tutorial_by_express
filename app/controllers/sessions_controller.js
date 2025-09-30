@@ -26,6 +26,8 @@ async function create(req, res) {
         }
     }
     // error処理
+    // connect-flashパッケージのreq.flash(...)は使用しない。これはredirectした先でflashを表示する
+    // 代わりに単にres.localsにflash objectを設定し、ejsでflash objectにアクセスできるようにする
     res.locals.flash = {danger: ['Invalid email/password combination']}
     res.status(422).render('sessions/new', { title: 'Log in' })
 }
