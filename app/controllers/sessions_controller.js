@@ -26,6 +26,7 @@ async function create(req, res) {
         }
     }
     // error処理
+    res.locals.flash = {danger: ['Invalid email/password combination']}
     res.status(422).render('sessions/new', { title: 'Log in' })
 }
 module.exports = {
