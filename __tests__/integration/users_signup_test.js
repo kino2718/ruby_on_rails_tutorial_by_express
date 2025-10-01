@@ -5,7 +5,6 @@ const User = require('../../app/models/user')
 
 const SUCCESS = 200
 const UNPROCESSABLE_ENTITY = 422
-const REDIRECT = 302
 
 describe('users signup test', () => {
     test('invalid signup information', async () => {

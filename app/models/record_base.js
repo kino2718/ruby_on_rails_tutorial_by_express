@@ -1,6 +1,3 @@
-const knexUtils = require('../db/knex_utils')
-const knex = knexUtils.knex
-
 class RecordBase {
     #newRecord = true
     #destroyed = false
