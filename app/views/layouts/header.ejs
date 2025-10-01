@@ -18,7 +18,24 @@
                 <ul class="nav">
                     <li class="nav-item"><a class="nav-link text-light" href="/">Home</a></li>
                     <li class="nav-item"><a class="nav-link text-light" href="/help">Help</a></li>
-                    <li class="nav-item"><a class="nav-link text-light" href="#">Log in</a></li>
+                    <% if (hasLoggedIn) { %>
+                        <li class="nav-item"><a class="nav-link text-light" href="#">Users</a></li>
+                        <li class="nav-item dropdown">
+                            <a href="#" id="account" class="nav-link text-light dropdown-toggle">
+                                Account <b class="caret"></b>
+                            </a>
+                            <ul id="dropdown-menu" class="dropdown-menu">
+                                <li><a href="/users/<%= currentUserId %>">Prifile</li>
+                                <li><a href="#">Settings</li>
+                                <li class="divider"></li>
+                                <li>
+                                     <a data-method="delete" href="/logout">Log out</a>
+                                </li>
+                            </ul>
+                        </li>
+                    <% } else { %>
+                        <li class="nav-item"><a class="nav-link text-light" href="/login">Log in</a></li>
+                    <% } %>
                 </ul>
             </nav>
         </div>

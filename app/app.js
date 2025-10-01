@@ -6,6 +6,7 @@ const usersController = require('./controllers/users_controller')
 const sessionsController = require('./controllers/sessions_controller')
 const applicationHelper = require('./helpers/application_helper')
 const templatesHelper = require('./helpers/templates_helper')
+const sessionsHelper = require('./helpers/sessions_helper')
 const session = require('express-session')
 const csrfHelper = require('./helpers/csrf_helper')
 const flash = require('connect-flash')
@@ -48,9 +49,13 @@ app.use(express.urlencoded({ extended: true }))  // x-www-form-urlencoded形式
 app.use(csrfHelper.makeCsrfToken)
 
 // set some variables to the res.locals
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     res.locals.title = undefined
     res.locals.debugOutput = applicationHelper.getDebugOutput(req)
+    // 全ての画面でlog in状態かどうかを知る必要があるのでここで取得・設定する
+    res.locals.hasLoggedIn = await sessionsHelper.hasLoggedIn(req.session)
+    const currentUser = await sessionsHelper.currentUser(req.session)
+    res.locals.currentUserId = currentUser ? currentUser.id : null
     next()
 })
 

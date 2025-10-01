@@ -5,15 +5,20 @@ function logIn(session, user) {
 }
 
 let _currentUser
-function currentUser(session) {
+async function currentUser(session) {
     if (session.userId) {
-        _currentUser = _currentUser || User.find(session.userId)
+        _currentUser = _currentUser || await User.find(session.userId)
         return _currentUser
     }
     return null
 }
 
+async function hasLoggedIn(session) {
+    return !! await currentUser(session)
+}
+
 module.exports = {
     logIn,
     currentUser,
+    hasLoggedIn,
 }
