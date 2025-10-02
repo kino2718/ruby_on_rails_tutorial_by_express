@@ -8,8 +8,12 @@ router.get('/login', (req, res) => {
     newSession(req, res)
 })
 
-router.post('/login', csrfHelper.verifyCsrfToken, async (req, res) => {
-    await create(req, res)
+router.post('/login', csrfHelper.verifyCsrfToken, async (req, res, next) => {
+    await create(req, res, next)
+})
+
+router.post('/logout', csrfHelper.verifyCsrfToken, (req, res) => {
+    destroy(req, res)
 })
 
 function newSession(req, res) {
@@ -40,6 +44,10 @@ async function create(req, res, next) {
     // 代わりに単にres.localsにflash objectを設定し、ejsでflash objectにアクセスできるようにする
     res.locals.flash = { danger: ['Invalid email/password combination'] }
     res.status(422).render('sessions/new', { title: 'Log in' })
+}
+
+function destroy(req, res) {
+    res.send('destroy is called')
 }
 
 module.exports = {
