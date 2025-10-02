@@ -5,6 +5,7 @@ import { defineConfig } from "eslint/config"
 export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs}"],
+    ignores: ["app/assets/js/bootstrap.bundle.min.js"],
     plugins: { js },
     extends: ["js/recommended"],
     languageOptions: {

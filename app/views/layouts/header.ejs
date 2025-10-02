@@ -21,16 +21,14 @@
                     <% if (hasLoggedIn) { %>
                         <li class="nav-item"><a class="nav-link text-light" href="#">Users</a></li>
                         <li class="nav-item dropdown">
-                            <a href="#" id="account" class="nav-link text-light dropdown-toggle">
-                                Account <b class="caret"></b>
+                            <a href="#" class="nav-link dropdown-toggle text-light" data-bs-toggle="dropdown">
+                                Account
                             </a>
-                            <ul id="dropdown-menu" class="dropdown-menu">
-                                <li><a href="/users/<%= currentUserId %>">Prifile</li>
-                                <li><a href="#">Settings</li>
-                                <li class="divider"></li>
-                                <li>
-                                     <a data-method="delete" href="/logout">Log out</a>
-                                </li>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/users/<%= currentUserId %>">Profile</a></li>
+                                <li><a class="dropdown-item" href="#">Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/logout">Log out</a></li>
                             </ul>
                         </li>
                     <% } else { %>
