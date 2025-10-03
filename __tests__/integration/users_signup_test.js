@@ -67,8 +67,12 @@ describe('users signup test', () => {
                 'user[password]': 'password',
                 'user[passwordConfirmation]': 'password'
             })
-            .redirects(1) // redirect先を読み込む
-        // ステータスコード (redirect 302)の確認
+
+        // ステータスコード (REDIRECT = 302)の確認
+        expect(res.status).toBe(302)
+
+        // リダイレクト先にアクセスして確認
+        res = await agent.get(res.headers.location)
         expect(res.status).toBe(SUCCESS)
 
         // ユーザ数が1人増えたことの確認
@@ -79,9 +83,22 @@ describe('users signup test', () => {
         $ = cheerio.load(res.text)
         expect($('.gravatar').length).toBe(1)
 
+        // ログイン状態を確認。sessionにアクセスするのは難しいので表示内容で判断する
+        // <a href="/login">Log in</a> が存在しないことを確認
+        expect($('a[href="/login"]').length).toBe(0)
+
+        // <form action="/logout" method="POST"> が存在することを確認
+        const form = $('form[action="/logout"][method="POST"]')
+        expect(form.length).toBe(1)
+
+        // <a href="/users/?">Profile</a> が存在することを確認
+        const users = await User.findBy({ email: 'user@example.com' })
+        expect(users.length).toBe(1)
+        const user = users[0]
+        expect($(`a[href="/users/${user.id}"]`).length).toBe(1)
+
         // 登録したユーザーを削除
-        const users = await User.findBy({email: 'user@example.com'})
-        if (users[0]) await users[0].destroy()
+        await knex('users').del()
     })
 
     const knexUtils = require('../../app/db/knex_utils')

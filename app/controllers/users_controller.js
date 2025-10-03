@@ -3,13 +3,14 @@ const router = express.Router()
 const User = require('../models/user')
 const applicationHelper = require('../helpers/application_helper')
 const csrfHelper = require('../helpers/csrf_helper')
+const sessionsHelper = require('../helpers/sessions_helper')
 
 router.get('/:userId', async (req, res) => {
     await show(req, res)
 })
 
-router.post('/', csrfHelper.verifyCsrfToken, async (req, res) => {
-    await create(req, res)
+router.post('/', csrfHelper.verifyCsrfToken, async (req, res, next) => {
+    await create(req, res, next)
 })
 
 async function show(req, res) {
@@ -26,17 +27,27 @@ function newUser(req, res) {
     res.render('users/new', { title: 'Sign up', user: user })
 }
 
-async function create(req, res) {
+async function create(req, res, next) {
     const userParams = req.body.user
     const user = new User(userParams)
     if (await user.save()) {
-        // flashの設定
-        req.flash('success', 'Welcome to the Sample App!')
+        // session idをリセット
+        req.session.regenerate(err => {
+            if (err) {
+                next(err)
+                return
+            }
+            // ログイン
+            sessionsHelper.logIn(req.session, user)
 
-        // ユーザ画面にredirectする
-        let baseUrl = req.baseUrl
-        if (baseUrl.at(-1) !== '/') baseUrl += '/'
-        res.redirect(`${baseUrl}${user.id}`)
+            // flashの設定
+            req.flash('success', 'Welcome to the Sample App!')
+
+            // ユーザ画面にredirectする
+            let baseUrl = req.baseUrl
+            if (baseUrl.at(-1) !== '/') baseUrl += '/'
+            res.redirect(`${baseUrl}${user.id}`)
+        })
     } else {
         res.status(422).render('users/new', { title: 'Sign up', user: user })
     }
