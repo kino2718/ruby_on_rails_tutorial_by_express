@@ -4,9 +4,6 @@ const debugLog = knexUtils.debugLog
 const bcrypt = require('bcryptjs')
 const RecordBase = require('./record_base')
 
-const SALT_ROUNDS = 12 // hash化でのsaltRounds。Railsでは12
-
-
 class User extends RecordBase {
     id // 自動で割り振られる。user.id = 3 等の id の手動での変更は save 時にエラーになる。変更しないこと
     name
@@ -208,7 +205,7 @@ class User extends RecordBase {
 
     #paramsToDB() {
         // passwordをhash化する
-        const hash = bcrypt.hashSync(this.#password, SALT_ROUNDS)
+        const hash = User.digest(this.#password)
         return { name: this.name, email: this.email, password_digest: hash }
     }
 
@@ -359,6 +356,11 @@ class User extends RecordBase {
         if (conds.email) conds.email = conds.email.toLowerCase()
         const temp = await User.findBy(conds)
         return temp.length == 0
+    }
+
+    static digest(str) {
+        const SALT_ROUNDS = 12 // hash化でのsaltRounds。Railsでは12
+        return bcrypt.hashSync(str, SALT_ROUNDS)
     }
 }
 
