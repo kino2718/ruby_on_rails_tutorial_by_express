@@ -16,6 +16,9 @@ JavaScript と Express で実装した Web アプリです。
 -   csrf: CSRF 対策用。
 -   dotenv: 環境変数用。
 -   connect-flash: flash 表示用。
+-   bcryptjs: password 等の hash 化用。
+-   package.json script の watch 用。
+-   eslint, @eslint/js, globals: Lint用。
 
 ## ローカルでの使い方
 
@@ -125,3 +128,18 @@ let user = new User()
 ```
 
 等とできるので便利です。
+
+## Lint 機能
+
+```bash
+$ npm run lint
+```
+
+で Lint が走ります。
+
+または
+```bash
+$ npm run lint:watch
+```
+
+とすると、JavaScript ファイルを変更すると自動的に Lint が走ります。
