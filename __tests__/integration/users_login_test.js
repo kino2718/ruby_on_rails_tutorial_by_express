@@ -25,7 +25,7 @@ describe('users login test', () => {
         user.save()
     })
 
-    test('login with invalid information', async () => {
+    test('login with valid email/invalid password', async () => {
         const agent = request.agent(app) // session維持のため必要
 
         // loginにアクセスしてcrfs tokenを取得
@@ -40,8 +40,8 @@ describe('users login test', () => {
             .type('form')
             .send({
                 _csrf: csrfToken,
-                'session[email]': '',
-                'session[password]': ''
+                'session[email]': user.email,
+                'session[password]': 'invalid'
             })
         // ステータスコード (unprocessable_entity = 422)の確認
         expect(res.status).toBe(UNPROCESSABLE_ENTITY)
@@ -66,14 +66,14 @@ describe('users login test', () => {
         expect($('.alert.alert-danger').length).toBe(0)
     })
 
-    test('login with valid information', async () => {
+    test('login with valid information followed by logout', async () => {
         const agent = request.agent(app) // session維持のため必要
 
         // loginにアクセスしてcrfs tokenを取得
         let res = await agent.get('/login')
         expect(res.status).toBe(SUCCESS)
         let $ = cheerio.load(res.text)
-        const csrfToken = $('input[name="_csrf"]').val()
+        let csrfToken = $('input[name="_csrf"]').val()
 
         // 有効なlog in
         res = await agent
@@ -100,10 +100,42 @@ describe('users login test', () => {
         expect($('a[href="/login"]').length).toBe(0)
 
         // <form action="/logout" method="POST"> が存在することを確認
-        const form = $('form[action="/logout"][method="POST"]')
+        let form = $('form[action="/logout"][method="POST"]')
         expect(form.length).toBe(1)
+
         // <a href="/users/?">Profile</a> が存在することを確認
         expect($(`a[href="/users/${user.id}"]`).length).toBe(1)
+
+        // ログアウト
+        // csrf tokenを取得
+        csrfToken = $('input[name="_csrf"]').val()
+        res = await agent
+            .post('/logout')
+            .type('form')
+            .send({
+                _csrf: csrfToken,
+            })
+
+        // ステータスコード (REDIRECT = 302)の確認
+        expect(res.status).toBe(REDIRECT)
+
+        // リダイレクト先にアクセスして確認
+        res = await agent.get(res.headers.location)
+        expect(res.status).toBe(SUCCESS)
+
+        // root ページを表示していることを確認
+        $ = cheerio.load(res.text)
+        expect($('title').text().trim()).toBe('Ruby on Rails Tutorial Sample App')
+
+        // <a href="/login">Log in</a> が存在することを確認
+        expect($('a[href="/login"]').length).toBe(1)
+
+        // <form action="/logout" method="POST"> が存在しないことを確認
+        form = $('form[action="/logout"][method="POST"]')
+        expect(form.length).toBe(0)
+
+        // <a href="/users/?">Profile</a> が存在しないことを確認
+        expect($(`a[href="/users/${user.id}"]`).length).toBe(0)
     })
 
     afterAll(async () => {

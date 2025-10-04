@@ -12,8 +12,8 @@ router.post('/login', csrfHelper.verifyCsrfToken, async (req, res, next) => {
     await create(req, res, next)
 })
 
-router.post('/logout', csrfHelper.verifyCsrfToken, (req, res) => {
-    destroy(req, res)
+router.post('/logout', csrfHelper.verifyCsrfToken, (req, res, next) => {
+    destroy(req, res, next)
 })
 
 function newSession(req, res) {
@@ -46,8 +46,18 @@ async function create(req, res, next) {
     res.status(422).render('sessions/new', { title: 'Log in' })
 }
 
-function destroy(req, res) {
-    res.send('destroy is called')
+function destroy(req, res, next) {
+    // ログアウト処理
+    sessionsHelper.logOut(req.session, err => {
+        if (err) {
+            next(err)
+            return
+        }
+    })
+    // cookieを削除
+    res.clearCookie('connect.sid')
+    // rootへリダイレクト
+    res.redirect('/')
 }
 
 module.exports = {
