@@ -22,7 +22,11 @@ app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, 'assets')))
 
 // session の設定
-const cookieSecure = process.env.NODE_ENV === 'production'
+let cookieSecure = false
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1) // 製品版(Render)でcookie.secure: trueが動作するために必要。
+    cookieSecure = true
+}
 app.use(session({
     secret: process.env.SESSION_SECRET, // セッションIDをハッシュ化するための秘密鍵（必須）
     resave: false,                      // セッションに変更がなくても保存するか（false推奨）
