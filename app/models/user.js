@@ -3,6 +3,7 @@ const knex = knexUtils.knex
 const debugLog = knexUtils.debugLog
 const bcrypt = require('bcryptjs')
 const RecordBase = require('./record_base')
+const uid = require('uid-safe')
 
 class User extends RecordBase {
     id // 自動で割り振られる。user.id = 3 等の id の手動での変更は save 時にエラーになる。変更しないこと
@@ -13,6 +14,8 @@ class User extends RecordBase {
     #password
     #passwordConfirmation
     #passwordDigest
+    #rememberToken
+    rememberDigest // Railsでは普通に表示されるのでprivateにしない。
     createdAt // 自動で割り振られる
     updatedAt // 自動で割り振られる
 
@@ -170,6 +173,28 @@ class User extends RecordBase {
         }
     }
 
+    async updateAttribute(key, value) {
+        if (this.persisted) {
+            try {
+                if (key === 'email') value = value.toLowerCase()
+                if (key === 'rememberDigest') key = 'remember_digest'
+                const params = { [key]: value }
+                const [res] = await knex('users')
+                    .where('id', this.id)
+                    .update({ ...params, updated_at: knex.fn.now() }) // updated_at はデータベース側で更新
+                    .returning('id')
+                await this.#reload(res.id)
+                this.setSaved()
+                debugLog(this)
+                return true
+            } catch (e) {
+                console.error(e)
+                return false
+            }
+        }
+        return false
+    }
+
     async #insert() {
         try {
             this.email = this.email.toLowerCase()
@@ -246,6 +271,11 @@ class User extends RecordBase {
         return u
     }
 
+    async remember() {
+        this.#rememberToken = await User.newToken()
+        await this.updateAttribute('rememberDigest', User.digest(this.#rememberToken))
+    }
+
     async destroy() {
         if (this.persisted) {
             try {
@@ -307,6 +337,7 @@ class User extends RecordBase {
             u.createdAt = obj.created_at
             u.updatedAt = obj.updated_at
             u.#passwordDigest = obj.password_digest
+            u.rememberDigest = obj.remember_digest
             u.setSaved() // このidのuserは既にdbに存在するため
             return u
         } else {
@@ -361,6 +392,10 @@ class User extends RecordBase {
     static digest(str) {
         const SALT_ROUNDS = 12 // hash化でのsaltRounds。Railsでは12
         return bcrypt.hashSync(str, SALT_ROUNDS)
+    }
+
+    static async newToken() {
+        return await uid(16)
     }
 }
 
