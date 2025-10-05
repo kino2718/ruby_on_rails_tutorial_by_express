@@ -14,7 +14,7 @@ class User extends RecordBase {
     #password
     #passwordConfirmation
     #passwordDigest
-    #rememberToken
+    rememberToken
     rememberDigest // Railsでは普通に表示されるのでprivateにしない。
     createdAt // 自動で割り振られる
     updatedAt // 自動で割り振られる
@@ -272,8 +272,14 @@ class User extends RecordBase {
     }
 
     async remember() {
-        this.#rememberToken = await User.newToken()
-        await this.updateAttribute('rememberDigest', User.digest(this.#rememberToken))
+        const rememberToken = await User.newToken()
+        await this.updateAttribute('rememberDigest', User.digest(rememberToken))
+        this.rememberToken = rememberToken
+    }
+
+    isAuthenticated(rememberToken) {
+        if (!rememberToken || !this.rememberDigest) return false
+        return bcrypt.compareSync(rememberToken, this.rememberDigest)
     }
 
     async destroy() {

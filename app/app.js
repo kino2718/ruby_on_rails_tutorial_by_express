@@ -10,6 +10,7 @@ const sessionsHelper = require('./helpers/sessions_helper')
 const session = require('express-session')
 const csrfHelper = require('./helpers/csrf_helper')
 const flash = require('connect-flash')
+const cookieParser = require('cookie-parser')
 
 const app = express()
 
@@ -21,14 +22,21 @@ app.set('view engine', 'ejs')
 // set the root directory of static assets
 app.use(express.static(path.join(__dirname, 'assets')))
 
+// cookie の設定
+const cookieSecret = process.env.COOKIE_SECRET
+if (!cookieSecret) console.error('COOKIE_SECRET is not defined.')
+app.use(cookieParser(cookieSecret))
+
 // session の設定
 let cookieSecure = false
 if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1) // 製品版(Render)でcookie.secure: trueが動作するために必要。
     cookieSecure = true
 }
+const sessionSecret = process.env.SESSION_SECRET
+if (!sessionSecret) console.error('SESSION_SECRET is not defined.')
 app.use(session({
-    secret: process.env.SESSION_SECRET, // セッションIDをハッシュ化するための秘密鍵（必須）
+    secret: sessionSecret,              // セッションIDをハッシュ化するための秘密鍵（必須）
     resave: false,                      // セッションに変更がなくても保存するか（false推奨）
     saveUninitialized: false,           // 初期化されていないセッションも保存するか（通常false）
     cookie: {
@@ -57,8 +65,8 @@ app.use(async (req, res, next) => {
     res.locals.title = undefined
     res.locals.debugOutput = applicationHelper.getDebugOutput(req)
     // 全ての画面でlog in状態かどうかを知る必要があるのでここで取得・設定する
-    res.locals.hasLoggedIn = await sessionsHelper.hasLoggedIn(req.session)
-    const currentUser = await sessionsHelper.currentUser(req.session)
+    res.locals.hasLoggedIn = await sessionsHelper.hasLoggedIn(req)
+    const currentUser = await sessionsHelper.currentUser(req)
     res.locals.currentUserId = currentUser ? currentUser.id : null
     next()
 })

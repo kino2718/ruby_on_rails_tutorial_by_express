@@ -44,6 +44,7 @@ PORT=3001 npm start
 -   DEBUG: "express:*" を設定すると express がデバッグ用ログを出力します。
 -   SQLITE_FILENAME: sqlite3 のデータベースのファイル名を指定します。指定のない場合は `./db/development.sqlite3` が使用されます。
 -   SESSION_SECRET: セッション管理用の秘密鍵です。
+-   COOKIE_SECRET: Cookie署名用の秘密鍵です。
 
 ## .scss ファイルのトランスパイル方法
 

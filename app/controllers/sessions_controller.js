@@ -27,12 +27,13 @@ async function create(req, res, next) {
         const user = users[0]
         if (user.authenticate(sessionParams.password)) {
             // session idをリセット
-            req.session.regenerate(err => {
+            req.session.regenerate(async err => {
                 if (err) {
                     next(err)
                     return
                 }
 
+                await sessionsHelper.remember(res, user)
                 sessionsHelper.logIn(req.session, user)
                 res.redirect(`/users/${user.id}`)
             })
