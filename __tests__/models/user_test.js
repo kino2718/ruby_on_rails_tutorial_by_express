@@ -84,6 +84,10 @@ describe('user model test', () => {
         expect(await user.valid()).toBe(true)
     })
 
+    test('"user.isAuthenticated should return false for a user with nil digest', () => {
+        expect(user.isAuthenticated('')).toBe(false)
+    })
+
     const knexUtils = require('../../app/db/knex_utils')
     const knex = knexUtils.knex
 
