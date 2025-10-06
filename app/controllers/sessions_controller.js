@@ -48,13 +48,15 @@ async function create(req, res, next) {
 }
 
 async function destroy(req, res, next) {
-    // ログアウト処理
-    await sessionsHelper.logOut(req, res, err => {
-        if (err) {
-            next(err)
-            return
-        }
-    })
+    if (await sessionsHelper.hasLoggedIn(req)) {
+        // ログアウト処理
+        await sessionsHelper.logOut(req, res, err => {
+            if (err) {
+                next(err)
+                return
+            }
+        })
+    }
     // cookieを削除
     res.clearCookie('connect.sid')
     // rootへリダイレクト

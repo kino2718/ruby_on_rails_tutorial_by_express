@@ -127,6 +127,16 @@ describe('users login test', () => {
         $ = cheerio.load(res.text)
         expect($('title').text().trim()).toBe('Ruby on Rails Tutorial Sample App')
 
+        // 2番目のウィンドウでログアウトをクリックするユーザーをシミュレートする
+        res = await agent
+            .post('/logout')
+            .type('form')
+            .send({
+                _csrf: csrfToken,
+            })
+        // ステータスコード (REDIRECT = 302)の確認
+        expect(res.status).toBe(REDIRECT)
+
         // <a href="/login">Log in</a> が存在することを確認
         expect($('a[href="/login"]').length).toBe(1)
 
