@@ -282,6 +282,10 @@ class User extends RecordBase {
         return bcrypt.compareSync(rememberToken, this.rememberDigest)
     }
 
+    async forget() {
+        await this.updateAttribute('remember_digest', null)
+    }
+
     async destroy() {
         if (this.persisted) {
             try {

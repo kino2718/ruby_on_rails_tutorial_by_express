@@ -47,9 +47,17 @@ async function hasLoggedIn(req) {
     return !! await currentUser(req)
 }
 
-function logOut(session, errorHandler) {
+async function forget(res, user) {
+    await user.forget()
+    res.clearCookie(COOKIE_USER_ID)
+    res.clearCookie(COOKIE_REMEMBER_TOKEN)
+}
+
+async function logOut(req, res, errorHandler) {
+    const user = await currentUser(req)
+    await forget(res, user)
     // sessionを破棄
-    session.destroy(err => {
+    req.session.destroy(err => {
         errorHandler(err)
         return
     })

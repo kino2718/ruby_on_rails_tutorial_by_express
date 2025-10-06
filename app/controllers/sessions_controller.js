@@ -12,8 +12,8 @@ router.post('/login', csrfHelper.verifyCsrfToken, async (req, res, next) => {
     await create(req, res, next)
 })
 
-router.post('/logout', csrfHelper.verifyCsrfToken, (req, res, next) => {
-    destroy(req, res, next)
+router.post('/logout', csrfHelper.verifyCsrfToken, async (req, res, next) => {
+    await destroy(req, res, next)
 })
 
 function newSession(req, res) {
@@ -47,9 +47,9 @@ async function create(req, res, next) {
     res.status(422).render('sessions/new', { title: 'Log in' })
 }
 
-function destroy(req, res, next) {
+async function destroy(req, res, next) {
     // ログアウト処理
-    sessionsHelper.logOut(req.session, err => {
+    await sessionsHelper.logOut(req, res, err => {
         if (err) {
             next(err)
             return
