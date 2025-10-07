@@ -3,6 +3,7 @@ const router = express.Router()
 const User = require('../models/user')
 const csrfHelper = require('../helpers/csrf_helper')
 const sessionsHelper = require('../helpers/sessions_helper')
+const applicationHelper = require('../helpers/application_helper')
 
 router.get('/login', (req, res) => {
     newSession(req, res)
@@ -21,6 +22,9 @@ function newSession(req, res) {
 }
 
 async function create(req, res, next) {
+    const debugOutputParams = applicationHelper.getDebugOutputParams(req)
+    if (debugOutputParams) res.locals.debugOutput += `, ${debugOutputParams}`
+
     const sessionParams = req.body.session
     const users = await User.findBy({ email: sessionParams.email.toLowerCase() })
     if (users && users.length === 1) {
@@ -33,7 +37,10 @@ async function create(req, res, next) {
                     return
                 }
 
-                await sessionsHelper.remember(res, user)
+                const rememberMe = sessionParams['remember_me']
+                if (rememberMe === '1') await sessionsHelper.remember(res, user)
+                else await sessionsHelper.forget(res, user)
+
                 sessionsHelper.logIn(req.session, user)
                 res.redirect(`/users/${user.id}`)
             })

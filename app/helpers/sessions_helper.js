@@ -70,5 +70,6 @@ module.exports = {
     remember,
     currentUser,
     hasLoggedIn,
+    forget,
     logOut,
 }
