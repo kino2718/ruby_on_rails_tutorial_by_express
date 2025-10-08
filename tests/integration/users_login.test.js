@@ -23,7 +23,7 @@ describe('users login test', () => {
                 password: 'password',
                 passwordConfirmation: 'password',
             })
-        user.save()
+        await user.save()
     })
 
     test('login with valid email/invalid password', async () => {

@@ -301,7 +301,7 @@ class User extends RecordBase {
     // static methods
     static async create(params = {}) {
         const user = new User(params)
-        if (user.save()) {
+        if (await user.save()) {
             return user
         } else {
             return null
