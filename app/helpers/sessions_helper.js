@@ -37,7 +37,7 @@ async function currentUser(req) {
         if (user && user.isAuthenticated(rememberToken)) {
             logIn(req.session, user)
             _currentUser = user
-            return currentUser
+            return _currentUser
         }
     }
     return null
