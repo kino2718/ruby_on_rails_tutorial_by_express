@@ -4,6 +4,7 @@ const app = require('../../app/app')
 const User = require('../../app/models/user')
 const knexUtils = require('../../app/db/knex_utils')
 const knex = knexUtils.knex
+const testHelper = require('../test_helper')
 
 const SUCCESS = 200
 const UNPROCESSABLE_ENTITY = 422
@@ -12,7 +13,7 @@ const REDIRECT = 302
 describe('users login test', () => {
     let user
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         await knex('users').del()
 
         user = new User(
@@ -146,6 +147,35 @@ describe('users login test', () => {
 
         // <a href="/users/?">Profile</a> が存在しないことを確認
         expect($(`a[href="/users/${user.id}"]`).length).toBe(0)
+    })
+
+    test('login with remembering', async () => {
+        const agent = request.agent(app) // session維持のため必要
+        let res = await testHelper.logInAs(agent, user.email, user.password, '1')
+
+        // Set-Cookie ヘッダの配列を取得
+        const cookies = res.headers['set-cookie']
+        const rememberToken = cookies.find(c => c.startsWith('rememberToken='))
+        // 値の取り出し
+        const value = rememberToken.split(';')[0].split('=')[1]
+        // 1文字以上を確認
+        expect(value.length).toBeGreaterThan(0)
+    })
+
+
+    test('login without remembering', async () => {
+        const agent = request.agent(app) // session維持のため必要
+        let res = await testHelper.logInAs(agent, user.email, user.password, '1')
+
+        // Cookieが削除されていることを検証
+        res = await testHelper.logInAs(agent, user.email, user.password, '0')
+        // Set-Cookie ヘッダの配列を取得
+        const cookies = res.headers['set-cookie']
+        const rememberToken = cookies.find(c => c.startsWith('rememberToken='))
+        // 値の取り出し
+        const value = rememberToken.split(';')[0].split('=')[1]
+        // 空文字列を確認
+        expect(value.length).toBe(0)
     })
 
     afterAll(async () => {
