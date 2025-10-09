@@ -1,0 +1,82 @@
+<%- include('../layouts/header') -%>
+
+    <h1>Update your profile</h1>
+
+    <div class="row">
+        <div class="col-md-6 offset-3">
+            <form action="/users/<%= user.id %>" accept-charset="UTF-8" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
+
+                <%- include('../shared/_error_messages') -%>
+
+                <%- makeFormLabel(
+                    user,
+                    'name',
+                    'user_name',
+                    'Name'
+                ) %>
+
+                <%- makeFormInput(
+                    user,
+                    'name',
+                    'text',
+                    'user[name]',
+                    'user_name'
+                ) %>
+
+                <%- makeFormLabel(
+                    user,
+                    'email',
+                    'user_email',
+                    'Email'
+                ) %>
+
+                <%- makeFormInput(
+                    user,
+                    'email',
+                    'email',
+                    'user[email]',
+                    'user_email'
+                ) %>
+
+                <%- makeFormLabel(
+                    user,
+                    'password',
+                    'user_password',
+                    'Password'
+                ) %>
+
+                <%- makeFormInput(
+                    user,
+                    'password',
+                    'password',
+                    'user[password]',
+                    'user_password'
+                ) %>
+
+                <%- makeFormLabel(
+                    user,
+                    'passwordConfirmation',
+                    'user_password_confirmation',
+                    'Confirmation'
+                ) %>
+
+                <%- makeFormInput(
+                    user,
+                    'passwordConfirmation',
+                    'password',
+                    'user[passwordConfirmation]',
+                    'user_password_confirmation'
+                ) %>
+
+                <input type="submit" name="commit" value="Save changes" class="btn btn-primary" />
+            </form>
+
+            <div class="gravatar_edit">
+                <%- gravatarFor(user) %>
+                <a href="https://gravatar.com/emails" target="_blank">change</a>
+            </div>
+        </div>
+    </div>
+
+<%- include('../layouts/footer') -%>
