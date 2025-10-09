@@ -61,7 +61,7 @@ class User extends RecordBase {
         return this.#passwordDigest
     }
 
-    async valid() {
+    async valid(checkEmailUnique = true) {
         const props = []
         const messages = []
         let v = true
@@ -127,7 +127,7 @@ class User extends RecordBase {
         }
 
         // email uniquness
-        if (! await User.#uniqueness({ email: this.email })) {
+        if (checkEmailUnique && ! await User.#uniqueness({ email: this.email })) {
             v = false
             props.push('email')
             messages.push('email has already been taken')
@@ -165,7 +165,7 @@ class User extends RecordBase {
             if ('email' in params) this.email = params.email
             if ('password' in params) this.#password = params.password
             if ('passwordConfirmation' in params) this.#passwordConfirmation = params.passwordConfirmation
-            if (!await this.valid()) return false
+            if (!await this.valid(false)) return false
 
             return this.#update()
         } else {

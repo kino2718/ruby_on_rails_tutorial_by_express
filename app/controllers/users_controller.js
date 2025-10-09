@@ -17,8 +17,8 @@ router.get('/:userId/edit', async (req, res) => {
     await edit(req, res)
 })
 
-router.post('/:userId', (req, res) => {
-    update(req, res)
+router.post('/:userId', csrfHelper.verifyCsrfToken, async (req, res) => {
+    await update(req, res)
 })
 
 async function show(req, res) {
@@ -68,9 +68,15 @@ async function edit(req, res) {
     res.render('users/edit', { title: 'Edit user', user: user })
 }
 
-function update(req, res) {
+async function update(req, res) {
     const userId = req.params.userId
-    res.send(`update userId = ${userId}`)
+    const user = await User.find(userId)
+    const userParams = req.body.user
+    if (await user.update(userParams)) {
+        res.send('updated successfully')
+    } else {
+        res.status(422).render('users/edit', { title: 'Edit user', user: user })
+    }
 }
 
 module.exports = {
