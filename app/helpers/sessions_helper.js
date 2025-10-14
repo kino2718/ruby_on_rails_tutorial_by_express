@@ -23,12 +23,11 @@ async function remember(res, user) {
     res.cookie(COOKIE_REMEMBER_TOKEN, user.rememberToken, getCookieOptions(false))
 }
 
-let _currentUser = null
 async function currentUser(req) {
     let userId = req.session.userId
     if (userId) {
-        _currentUser = _currentUser || await User.find(userId)
-        return _currentUser
+        req.currentUser = req.currentUser || await User.find(userId)
+        return req.currentUser
     }
     userId = req.signedCookies.userId
     if (userId) {
@@ -36,8 +35,8 @@ async function currentUser(req) {
         const rememberToken = req.cookies.rememberToken
         if (user && user.isAuthenticated(rememberToken)) {
             logIn(req.session, user)
-            _currentUser = user
-            return _currentUser
+            req.currentUser = user
+            return req.currentUser
         }
     }
     return null
@@ -62,7 +61,7 @@ async function logOut(req, res, errorHandler) {
         return
     })
     // current userをリセット
-    _currentUser = null
+    req.currentUser = null
 }
 
 module.exports = {
