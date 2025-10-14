@@ -64,7 +64,6 @@ async function create(req, res, next) {
 async function edit(req, res) {
     const userId = req.params.userId
     const user = await User.find(userId)
-    console.log('user: ', user)
     res.render('users/edit', { title: 'Edit user', user: user })
 }
 
@@ -73,7 +72,13 @@ async function update(req, res) {
     const user = await User.find(userId)
     const userParams = req.body.user
     if (await user.update(userParams)) {
-        res.send('updated successfully')
+        // flashの設定
+        req.flash('success', 'Profile updated')
+
+        // ユーザ画面にredirectする
+        let baseUrl = req.baseUrl
+        if (baseUrl.at(-1) !== '/') baseUrl += '/'
+        res.redirect(`${baseUrl}${user.id}`)
     } else {
         res.status(422).render('users/edit', { title: 'Edit user', user: user })
     }

@@ -61,7 +61,7 @@ class User extends RecordBase {
         return this.#passwordDigest
     }
 
-    async valid(checkEmailUnique = true) {
+    async valid(allowEmptyPassword = false) {
         const props = []
         const messages = []
         let v = true
@@ -99,14 +99,14 @@ class User extends RecordBase {
         }
 
         // password presence
-        if (!User.#presence(this.#password)) {
+        if (!(allowEmptyPassword || User.#presence(this.#password))) {
             v = false
             props.push('password')
             messages.push("password can't be blank")
         }
 
         // passwordConfirmation presence
-        if (!User.#presence(this.#passwordConfirmation)) {
+        if (!(allowEmptyPassword || User.#presence(this.#passwordConfirmation))) {
             v = false
             props.push('passwordConfirmation')
             messages.push("password confirmation can't be blank")
@@ -120,14 +120,14 @@ class User extends RecordBase {
         }
 
         // password length
-        if (!User.#validLength(this.#password, { minimum: 6 })) {
+        if (!((allowEmptyPassword && !User.#presence(this.#password)) || User.#validLength(this.#password, { minimum: 6 }))) {
             v = false
             props.push('password')
             messages.push("password is too short")
         }
 
         // email uniquness
-        if (checkEmailUnique && ! await User.#uniqueness({ email: this.email })) {
+        if (! await this.#uniqueness({ email: this.email })) {
             v = false
             props.push('email')
             messages.push('email has already been taken')
@@ -145,13 +145,13 @@ class User extends RecordBase {
     }
 
     async save() {
-        if (!await this.valid()) return false
-
         if (this.newRecord) {
             // insert
+            if (!await this.valid()) return false
             return this.#insert()
         } else if (this.persisted) {
             // update
+            if (!await this.valid(true)) return false
             return this.#update()
         } else {
             // 破棄済み。何もしない
@@ -165,7 +165,7 @@ class User extends RecordBase {
             if ('email' in params) this.email = params.email
             if ('password' in params) this.#password = params.password
             if ('passwordConfirmation' in params) this.#passwordConfirmation = params.passwordConfirmation
-            if (!await this.valid(false)) return false
+            if (!await this.valid(true)) return false
 
             return this.#update()
         } else {
@@ -229,9 +229,14 @@ class User extends RecordBase {
     }
 
     #paramsToDB() {
-        // passwordをhash化する
-        const hash = User.digest(this.#password)
-        return { name: this.name, email: this.email, password_digest: hash }
+        if (User.#presence(this.#password)) {
+            // passwordをhash化する
+            const hash = User.digest(this.#password)
+            return { name: this.name, email: this.email, password_digest: hash }
+        }
+        else {
+            return { name: this.name, email: this.email }
+        }
     }
 
     async reload() {
@@ -296,6 +301,16 @@ class User extends RecordBase {
             }
         }
         return this
+    }
+
+    async #uniqueness(conds) {
+        if (conds.email) conds.email = conds.email.toLowerCase()
+        const temp = await User.findBy(conds)
+        if (temp.length == 0) return true
+        else if (temp.length == 1) {
+            return temp.id !== this.id
+        }
+        return false
     }
 
     // static methods
@@ -391,12 +406,6 @@ class User extends RecordBase {
         if (conds.with) {
             return conds.with.test(str)
         }
-    }
-
-    static async #uniqueness(conds) {
-        if (conds.email) conds.email = conds.email.toLowerCase()
-        const temp = await User.findBy(conds)
-        return temp.length == 0
     }
 
     static digest(str) {

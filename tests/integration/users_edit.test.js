@@ -7,6 +7,7 @@ const knex = knexUtils.knex
 
 const SUCCESS = 200
 const UNPROCESSABLE_ENTITY = 422
+const REDIRECT = 302
 
 describe('users edit test', () => {
     let user
@@ -56,6 +57,50 @@ describe('users edit test', () => {
         expect($(`form[action="/users/${user.id}"]`).length).toBe(1)
     })
 
+    test('successful edit', async () => {
+        const agent = request.agent(app)
+
+        // 編集画面にアクセス
+        let res = await agent.get(`/users/${user.id}/edit`)
+        // アクセス成功を確認
+        expect(res.status).toBe(SUCCESS)
+        // ページの内容の確認
+        let $ = cheerio.load(res.text)
+        expect($(`form[action="/users/${user.id}"]`).length).toBe(1)
+        // crsf tokenを取得
+        $ = cheerio.load(res.text)
+        const csrfToken = $('input[name="_csrf"]').val()
+
+        // 成功する編集データをpost
+        const name = 'Foo Bar'
+        const email = 'foo@bar.com'
+        res = await agent
+            .post(`/users/${user.id}`)
+            .type('form')
+            .send({
+                _csrf: csrfToken,
+                'user[name]': name,
+                'user[email]': email,
+                'user[password]': '',
+                'user[passwordConfirmation]': ''
+            })
+
+        // ステータスコード (REDIRECT = 302)の確認
+        expect(res.status).toBe(REDIRECT)
+
+        // リダイレクト先にアクセスして確認
+        res = await agent.get(res.headers.location)
+        expect(res.status).toBe(SUCCESS)
+
+        // ユーザーのページを表示していることを確認
+        $ = cheerio.load(res.text)
+        expect($('.gravatar').length).toBe(1)
+
+        // ユーザーがアップデートされていることの確認
+        await user.reload()
+        expect(user.name).toBe(name)
+        expect(user.email).toBe(email)
+    })
     afterAll(async () => {
         await knex.destroy() // コネクションを閉じる
     })
