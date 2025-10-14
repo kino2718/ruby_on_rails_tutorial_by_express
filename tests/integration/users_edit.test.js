@@ -4,6 +4,7 @@ const app = require('../../app/app')
 const User = require('../../app/models/user')
 const knexUtils = require('../../app/db/knex_utils')
 const knex = knexUtils.knex
+const testHelper = require('../test_helper')
 
 const SUCCESS = 200
 const UNPROCESSABLE_ENTITY = 422
@@ -27,6 +28,8 @@ describe('users edit test', () => {
 
     test('unsuccessful edit', async () => {
         const agent = request.agent(app)
+        // ログイン
+        await testHelper.logInAs(agent, user.email, user.password)
 
         // 編集画面にアクセス
         let res = await agent.get(`/users/${user.id}/edit`)
@@ -59,6 +62,8 @@ describe('users edit test', () => {
 
     test('successful edit', async () => {
         const agent = request.agent(app)
+        // ログイン
+        await testHelper.logInAs(agent, user.email, user.password)
 
         // 編集画面にアクセス
         let res = await agent.get(`/users/${user.id}/edit`)
@@ -101,6 +106,7 @@ describe('users edit test', () => {
         expect(user.name).toBe(name)
         expect(user.email).toBe(email)
     })
+
     afterAll(async () => {
         await knex.destroy() // コネクションを閉じる
     })

@@ -13,11 +13,11 @@ router.post('/', csrfHelper.verifyCsrfToken, async (req, res, next) => {
     await create(req, res, next)
 })
 
-router.get('/:userId/edit', async (req, res) => {
+router.get('/:userId/edit', loggedInUser, async (req, res) => {
     await edit(req, res)
 })
 
-router.post('/:userId', csrfHelper.verifyCsrfToken, async (req, res) => {
+router.post('/:userId', csrfHelper.verifyCsrfToken, loggedInUser, async (req, res) => {
     await update(req, res)
 })
 
@@ -81,6 +81,17 @@ async function update(req, res) {
         res.redirect(`${baseUrl}${user.id}`)
     } else {
         res.status(422).render('users/edit', { title: 'Edit user', user: user })
+    }
+}
+
+async function loggedInUser(req, res, next) {
+    if (! await sessionsHelper.hasLoggedIn(req)) {
+        // flash の設定
+        req.flash('danger', 'Please log in.')
+        // log in画面にredirect
+        res.redirect('/login')
+    } else {
+        next()
     }
 }
 
