@@ -64,6 +64,11 @@ async function logOut(req, res, errorHandler) {
     req.currentUser = null
 }
 
+async function isCurrentUser(req, user) {
+    const curUser = await currentUser(req)
+    return !!(user && curUser && user.id === curUser.id)
+}
+
 module.exports = {
     logIn,
     remember,
@@ -71,4 +76,5 @@ module.exports = {
     hasLoggedIn,
     forget,
     logOut,
+    isCurrentUser,
 }

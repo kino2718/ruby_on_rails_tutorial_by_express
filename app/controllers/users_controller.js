@@ -13,11 +13,11 @@ router.post('/', csrfHelper.verifyCsrfToken, async (req, res, next) => {
     await create(req, res, next)
 })
 
-router.get('/:userId/edit', loggedInUser, async (req, res) => {
+router.get('/:userId/edit', loggedInUser, correctUser, async (req, res) => {
     await edit(req, res)
 })
 
-router.post('/:userId', csrfHelper.verifyCsrfToken, loggedInUser, async (req, res) => {
+router.post('/:userId', csrfHelper.verifyCsrfToken, loggedInUser, correctUser, async (req, res) => {
     await update(req, res)
 })
 
@@ -90,6 +90,17 @@ async function loggedInUser(req, res, next) {
         req.flash('danger', 'Please log in.')
         // log in画面にredirect
         res.redirect('/login')
+    } else {
+        next()
+    }
+}
+
+async function correctUser(req, res, next) {
+    const userId = req.params.userId
+    const user = await User.find(userId)
+    if (! await sessionsHelper.isCurrentUser(req, user)) {
+        // root画面にredirect
+        res.redirect('/')
     } else {
         next()
     }
