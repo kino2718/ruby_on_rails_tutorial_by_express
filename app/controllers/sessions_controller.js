@@ -30,6 +30,7 @@ async function create(req, res, next) {
     if (users && users.length === 1) {
         const user = users[0]
         if (user.authenticate(sessionParams.password)) {
+            const forwardingUrl = req.session.forwardingUrl
             // session idをリセット
             req.session.regenerate(async err => {
                 if (err) {
@@ -42,7 +43,8 @@ async function create(req, res, next) {
                 else await sessionsHelper.forget(res, user)
 
                 sessionsHelper.logIn(req.session, user)
-                res.redirect(`/users/${user.id}`)
+                const url = forwardingUrl || `/users/${user.id}`
+                res.redirect(url)
             })
             return
         }

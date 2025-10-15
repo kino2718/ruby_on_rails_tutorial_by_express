@@ -86,6 +86,8 @@ async function update(req, res) {
 
 async function loggedInUser(req, res, next) {
     if (! await sessionsHelper.hasLoggedIn(req)) {
+        // urlを保存
+        sessionsHelper.storeLocation(req)
         // flash の設定
         req.flash('danger', 'Please log in.')
         // log in画面にredirect

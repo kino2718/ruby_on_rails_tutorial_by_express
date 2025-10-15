@@ -107,6 +107,28 @@ describe('users edit test', () => {
         expect(user.email).toBe(email)
     })
 
+    test('friendly forwarding', async () => {
+        const agent = request.agent(app)
+
+        // 編集画面にアクセス
+        let res = await agent.get(`/users/${user.id}/edit`)
+        // ステータスコードの確認
+        expect(res.status).toBe(REDIRECT)
+
+        // ログイン
+        res = await testHelper.logInAs(agent, user.email, user.password)
+        // ステータスコードの確認
+        expect(res.status).toBe(REDIRECT)
+
+        // リダイレクト先にアクセスして確認
+        res = await agent.get(res.headers.location)
+        expect(res.status).toBe(SUCCESS)
+
+        // 編集画面に戻っていることを確認
+        let $ = cheerio.load(res.text)
+        expect($(`form[action="/users/${user.id}"]`).length).toBe(1)
+    })
+
     afterAll(async () => {
         await knex.destroy() // コネクションを閉じる
     })

@@ -69,6 +69,12 @@ async function isCurrentUser(req, user) {
     return !!(user && curUser && user.id === curUser.id)
 }
 
+function storeLocation(req) {
+    if (req.method === 'GET') {
+        req.session.forwardingUrl = req.originalUrl
+    }
+}
+
 module.exports = {
     logIn,
     remember,
@@ -77,4 +83,5 @@ module.exports = {
     forget,
     logOut,
     isCurrentUser,
+    storeLocation,
 }
