@@ -76,6 +76,7 @@ app.locals.fullTitle = templatesHelper.fullTitle
 app.locals.gravatarFor = templatesHelper.gravatarFor
 app.locals.makeFormLabel = templatesHelper.makeFormLabel
 app.locals.makeFormInput = templatesHelper.makeFormInput
+app.locals.paginate = templatesHelper.paginate
 
 // use express.Router
 app.use('/', staticPagesController.router)

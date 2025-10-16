@@ -11,7 +11,7 @@ function fullTitle(pageTitle = '') {
 }
 
 
-function gravatarFor(user, options = {size: 80 }) {
+function gravatarFor(user, options = { size: 80 }) {
     const email = user.email.toLowerCase()
     const gravatarId = crypto.createHash('md5').update(email).digest('hex')
     const gravatarUrl = `https://secure.gravatar.com/avatar/${gravatarId}?s=${options.size}`
@@ -73,9 +73,42 @@ function makeFormInput(obj, prop, type, name, id) {
     return res
 }
 
+function paginate(pagination, baseUrl) {
+    let html = '<nav aria-label="Page navigation"><ul class="pagination">'
+
+    const prevPage = Math.min(Math.max(1, pagination.current - 1), pagination.totalPages)
+    const disablePrev = pagination.current === 1 ? 'disabled' : ''
+    html += `
+      <li class="page-item ${disablePrev}">
+        <a class="page-link" href="${baseUrl}?page=${prevPage}">&#8592; Previous</a>
+      </li>
+    `
+
+    for (let i = 1; i <= pagination.totalPages; i++) {
+        const active = i === pagination.current ? 'active' : ''
+        html += `
+      <li class="page-item ${active}">
+        <a class="page-link" href="${baseUrl}?page=${i}">${i}</a>
+      </li>
+    `
+    }
+
+    const nextPage = Math.min(Math.max(1, pagination.current + 1), pagination.totalPages)
+    const disableNext = pagination.current === pagination.totalPages ? 'disabled' : ''
+    html += `
+      <li class="page-item ${disableNext}">
+        <a class="page-link" href="${baseUrl}?page=${nextPage}">Next &#8594;</a>
+      </li>
+    `
+
+    html += '</ul></nav>'
+    return html
+}
+
 module.exports = {
     fullTitle,
     gravatarFor,
     makeFormLabel,
     makeFormInput,
+    paginate,
 }

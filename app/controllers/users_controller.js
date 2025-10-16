@@ -26,8 +26,14 @@ router.post('/:userId', csrfHelper.verifyCsrfToken, loggedInUser, correctUser, a
 })
 
 async function index(req, res) {
-    const users = await User.all()
-    res.render('users/index', { title: 'All users', users: users })
+    const page = parseInt(req.query.page) || 1
+    const perPage = 30
+    const totalCount = await User.count()
+    const totalPages = Math.ceil(totalCount / perPage)
+    const offset = (page - 1) * perPage
+
+    const users = await User.paginate(perPage, offset)
+    res.render('users/index', { title: 'All users', users: users, pagination: { current: page, totalPages: totalPages } })
 }
 
 async function show(req, res) {

@@ -380,6 +380,16 @@ class User extends RecordBase {
         }
     }
 
+    static async paginate(perPage, offset) {
+        try {
+            const li = await knex('users').select('*').orderBy('id', 'asc').limit(perPage).offset(offset)
+            return li.map(o => User.#dbToUserObject(o))
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
     static async count() {
         const { count } = await knex('users').count('* as count').first()
         // 文字列の可能性があるので Number に変換

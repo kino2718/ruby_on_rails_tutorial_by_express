@@ -2,6 +2,8 @@
 
 <h1>All users</h1>
 
+<%- paginate(pagination, '/users') %>
+
 <ul class="users">
     <% users.forEach((user) => { %>
         <li>
@@ -10,5 +12,7 @@
         </li>
     <% }) %>
 </ul>
+
+<%- paginate(pagination, '/users') %>
 
 <%- include('../layouts/footer') -%>
