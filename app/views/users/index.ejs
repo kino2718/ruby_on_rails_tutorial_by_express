@@ -1,0 +1,14 @@
+<%- include('../layouts/header') -%>
+
+<h1>All users</h1>
+
+<ul class="users">
+    <% users.forEach((user) => { %>
+        <li>
+            <%- gravatarFor(user, {size: 50}) %>
+            <a href="/users/<%= user.id %>"><%= user.name %></a>
+        </li>
+    <% }) %>
+</ul>
+
+<%- include('../layouts/footer') -%>

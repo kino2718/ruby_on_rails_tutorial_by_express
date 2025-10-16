@@ -40,6 +40,14 @@ describe('users controller test', () => {
         expect(res.status).toBe(SUCCESS)
     })
 
+    test('should redirect index when not logged in', async () => {
+        const res = await request(app).get('/users')
+        // ステータスコードの確認
+        expect(res.status).toBe(REDIRECT)
+        // リダイレクト先のURL確認
+        expect(res.headers.location).toBe('/login')
+    })
+
     test('should redirect edit when not logged in', async () => {
         const agent = request.agent(app)
 

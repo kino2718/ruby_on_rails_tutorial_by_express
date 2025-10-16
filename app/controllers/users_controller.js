@@ -5,6 +5,10 @@ const applicationHelper = require('../helpers/application_helper')
 const csrfHelper = require('../helpers/csrf_helper')
 const sessionsHelper = require('../helpers/sessions_helper')
 
+router.get('/', loggedInUser, async (req, res) => {
+    await index(req, res)
+})
+
 router.get('/:userId', async (req, res) => {
     await show(req, res)
 })
@@ -20,6 +24,11 @@ router.get('/:userId/edit', loggedInUser, correctUser, async (req, res) => {
 router.post('/:userId', csrfHelper.verifyCsrfToken, loggedInUser, correctUser, async (req, res) => {
     await update(req, res)
 })
+
+async function index(req, res) {
+    const users = await User.all()
+    res.render('users/index', { title: 'All users', users: users })
+}
 
 async function show(req, res) {
     const debugOutputParams = applicationHelper.getDebugOutputParams(req)
