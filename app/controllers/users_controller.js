@@ -51,7 +51,7 @@ function newUser(req, res) {
 }
 
 async function create(req, res, next) {
-    const userParams = req.body.user
+    const userParams = filterSafeParams(req.body.user)
     const user = new User(userParams)
     if (await user.save()) {
         // session idをリセット
@@ -85,7 +85,7 @@ async function edit(req, res) {
 async function update(req, res) {
     const userId = req.params.userId
     const user = await User.find(userId)
-    const userParams = req.body.user
+    const userParams = filterSafeParams(req.body.user)
     if (await user.update(userParams)) {
         // flashの設定
         req.flash('success', 'Profile updated')
@@ -121,6 +121,15 @@ async function correctUser(req, res, next) {
     } else {
         next()
     }
+}
+
+function filterSafeParams(params) {
+    const filtered = {}
+    filtered.name = params.name
+    filtered.email = params.email
+    filtered.password = params.password
+    filtered.passwordConfirmation = params.passwordConfirmation
+    return filtered
 }
 
 module.exports = {

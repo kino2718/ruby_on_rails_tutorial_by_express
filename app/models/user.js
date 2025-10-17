@@ -16,6 +16,7 @@ class User extends RecordBase {
     #passwordDigest
     rememberToken
     rememberDigest // Railsでは普通に表示されるのでprivateにしない。
+    admin
     createdAt // 自動で割り振られる
     updatedAt // 自動で割り振られる
 
@@ -25,6 +26,7 @@ class User extends RecordBase {
         this.email = params.email
         this.#password = params.password
         this.#passwordConfirmation = params.passwordConfirmation
+        this.admin = params.admin
     }
 
     // password関連のpropertyのgetter, setter methods
@@ -165,6 +167,7 @@ class User extends RecordBase {
             if ('email' in params) this.email = params.email
             if ('password' in params) this.#password = params.password
             if ('passwordConfirmation' in params) this.#passwordConfirmation = params.passwordConfirmation
+            if ('admin' in params) this.admin = params.admin
             if (!await this.valid(true)) return false
 
             return this.#update()
@@ -232,10 +235,10 @@ class User extends RecordBase {
         if (User.#presence(this.#password)) {
             // passwordをhash化する
             const hash = User.digest(this.#password)
-            return { name: this.name, email: this.email, password_digest: hash }
+            return { name: this.name, email: this.email, admin: !!this.admin, password_digest: hash }
         }
         else {
-            return { name: this.name, email: this.email }
+            return { name: this.name, email: this.email, admin: !!this.admin }
         }
     }
 
@@ -273,6 +276,7 @@ class User extends RecordBase {
         u.#password = this.#password
         u.#passwordConfirmation = this.#passwordConfirmation
         u.#passwordDigest = this.#passwordDigest
+        u.admin = this.admin
         return u
     }
 
@@ -363,6 +367,7 @@ class User extends RecordBase {
             u.updatedAt = obj.updated_at
             u.#passwordDigest = obj.password_digest
             u.rememberDigest = obj.remember_digest
+            u.admin = obj.admin
             u.setSaved() // このidのuserは既にdbに存在するため
             return u
         } else {

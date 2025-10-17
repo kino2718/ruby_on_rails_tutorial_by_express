@@ -14,7 +14,8 @@ exports.seed = async function (knex) {
     name: 'Example User',
     email: 'example@railstutorial.org',
     password: 'foobar',
-    passwordConfirmation: 'foobar'
+    passwordConfirmation: 'foobar',
+    admin: true
   })
 
   // 追加のユーザーをまとめて生成する
