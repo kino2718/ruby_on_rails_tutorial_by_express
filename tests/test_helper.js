@@ -1,4 +1,7 @@
 const cheerio = require('cheerio')
+const User = require('../app/models/user')
+const knexUtils = require('../app/db/knex_utils')
+const knex = knexUtils.knex
 
 // rew, reqの変わりに使用する
 function mock() {
@@ -37,8 +40,64 @@ async function logInAs(agent, email, password, rememberMe = '1') {
         })
 }
 
+async function setupUsers() {
+    await knex('users').del()
+
+    const users = {}
+
+    users.michael = await User.create(
+        {
+            name: 'Michael Example',
+            email: 'michael@example.com',
+            password: 'password',
+            passwordConfirmation: 'password'
+        }
+    )
+
+    users.archer = await User.create(
+        {
+            name: 'Sterling Archer',
+            email: 'duchess@example.gov',
+            password: 'password',
+            passwordConfirmation: 'password'
+        }
+    )
+
+    users.lana = await User.create(
+        {
+            name: 'Lana Kane',
+            email: 'hands@example.gov',
+            password: 'password',
+            passwordConfirmation: 'password'
+        }
+    )
+
+    users.malory = await User.create(
+        {
+            name: 'Malory Archer',
+            email: 'boss@example.gov',
+            password: 'password',
+            passwordConfirmation: 'password'
+        }
+    )
+
+    for (let i = 0; i < 30; ++i) {
+        users[`user_${i}`] = await User.create(
+            {
+                name: `User ${i}`,
+                email: `user-${i}@example.com`,
+                password: 'password',
+                passwordConfirmation: 'password'
+            }
+        )
+    }
+
+    return users
+}
+
 module.exports = {
     mock,
     isLoggedIn,
     logInAs,
+    setupUsers,
 }
