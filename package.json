@@ -18,6 +18,7 @@
     "migrate:reset:dev": "knex migrate:rollback --all --env development && npx knex migrate:latest --env development",
     "migrate:latest:prod": "knex migrate:latest --env production",
     "migrate:rollback:prod": "knex migrate:rollback --env production",
+    "migrate:reset:prod": "knex migrate:rollback --all --env production && npx knex migrate:latest --env production",
     "console": "NODE_ENV=development node -i -r ./setup_console.js",
     "console:sandbox": "SQLITE_FILENAME=./db/tmp.sqlite3 knex migrate:latest --env development && NODE_ENV=development SQLITE_FILENAME=./db/tmp.sqlite3 node -i -r ./setup_console.js; rm -f ./db/tmp.sqlite3",
     "lint": "eslint .",
