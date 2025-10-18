@@ -50,7 +50,8 @@ async function setupUsers() {
             name: 'Michael Example',
             email: 'michael@example.com',
             password: 'password',
-            passwordConfirmation: 'password'
+            passwordConfirmation: 'password',
+            admin: true
         }
     )
 

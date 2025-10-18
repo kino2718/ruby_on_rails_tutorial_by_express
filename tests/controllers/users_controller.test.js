@@ -22,6 +22,7 @@ describe('users controller test', () => {
                 email: 'michael@example.com',
                 password: 'password',
                 passwordConfirmation: 'password',
+                admin: true
             })
         await user.save()
 
@@ -178,6 +179,69 @@ describe('users controller test', () => {
 
         // rootページの確認
         expect($('title').text().trim()).toBe('Ruby on Rails Tutorial Sample App')
+    })
+
+    test('should redirect destroy when not logged in', async () => {
+        const agent = request.agent(app)
+
+        const count1 = await User.count()
+
+        // crsf tokenを取るためだけにlogin画面にアクセスする
+        let res = await agent.get('/login')
+        expect(res.status).toBe(SUCCESS)
+        let $ = cheerio.load(res.text)
+        const csrfToken = $('input[name="_csrf"]').val()
+
+        // userをdelete
+        res = await agent
+            .post(`/users/${user.id}/delete`)
+            .type('form')
+            .send({
+                _csrf: csrfToken
+            })
+
+        const count2 = await User.count()
+        // user数に変化のないことを確認
+        expect(count2).toBe(count1)
+
+        // ステータスコード (REDIRECT = 302)の確認
+        expect(res.status).toBe(REDIRECT)
+
+        // リダイレクト先がloginであることを確認
+        expect(res.headers.location).toBe('/login')
+    })
+
+    test('should redirect destroy when logged in as a non-admin', async () => {
+        const agent = request.agent(app)
+
+        // non-adminとして login
+        let res = await testHelper.logInAs(agent, otherUser.email, otherUser.password)
+
+        const count1 = await User.count()
+
+        // crsf tokenを取るためだけにlogin画面にアクセスする
+        res = await agent.get('/login')
+        expect(res.status).toBe(SUCCESS)
+        let $ = cheerio.load(res.text)
+        const csrfToken = $('input[name="_csrf"]').val()
+
+        // userをdelete
+        res = await agent
+            .post(`/users/${user.id}/delete`)
+            .type('form')
+            .send({
+                _csrf: csrfToken
+            })
+
+        const count2 = await User.count()
+        // user数に変化のないことを確認
+        expect(count2).toBe(count1)
+
+        // ステータスコード (REDIRECT = 302)の確認
+        expect(res.status).toBe(REDIRECT)
+
+        // リダイレクト先がrootであることを確認
+        expect(res.headers.location).toBe('/')
     })
 
     afterAll(async () => {

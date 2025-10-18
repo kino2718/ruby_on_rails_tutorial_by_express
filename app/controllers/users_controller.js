@@ -112,7 +112,6 @@ async function destroy(req, res) {
         req.flash('success', 'User deleted')
     }
     let baseUrl = req.baseUrl
-    if (baseUrl.at(-1) !== '/') baseUrl += '/'
     res.redirect(`${baseUrl}`)
 }
 
