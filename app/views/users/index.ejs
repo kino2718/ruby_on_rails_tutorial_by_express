@@ -8,7 +8,14 @@
     <% users.forEach((user) => { %>
         <li>
             <%- gravatarFor(user, {size: 50}) %>
-            <a href="/users/<%= user.id %>"><%= user.name %></a>
+            <a href="/users/<%= user.id %>" class="text-decoration-none"><%= user.name %></a>
+            <% if (currentUser && currentUser.admin && currentUser.id !== user.id) { %>
+                <!-- POSTでdeleteするためformを使用 -->
+                <form action="/users/<%= user.id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('You sure?');">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
+                    | <button type="submit" class="btn btn-link p-0 align-baseline text-decoration-none">delete</button>
+                </form>
+            <% } %>
         </li>
     <% }) %>
 </ul>

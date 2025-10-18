@@ -25,6 +25,10 @@ router.post('/:userId', csrfHelper.verifyCsrfToken, loggedInUser, correctUser, a
     await update(req, res)
 })
 
+router.post('/:userId/delete', csrfHelper.verifyCsrfToken, loggedInUser, adminUser, async (req, res) => {
+    await destroy(req, res)
+})
+
 async function index(req, res) {
     const page = parseInt(req.query.page) || 1
     const perPage = 30
@@ -33,7 +37,8 @@ async function index(req, res) {
     const offset = (page - 1) * perPage
 
     const users = await User.paginate(perPage, offset)
-    res.render('users/index', { title: 'All users', users: users, pagination: { current: page, totalPages: totalPages } })
+    const currentUser = await sessionsHelper.currentUser(req)
+    res.render('users/index', { title: 'All users', currentUser: currentUser, users: users, pagination: { current: page, totalPages: totalPages } })
 }
 
 async function show(req, res) {
@@ -99,6 +104,18 @@ async function update(req, res) {
     }
 }
 
+async function destroy(req, res) {
+    const userId = req.params.userId
+    const user = await User.find(userId)
+    if (user) {
+        await user.destroy()
+        req.flash('success', 'User deleted')
+    }
+    let baseUrl = req.baseUrl
+    if (baseUrl.at(-1) !== '/') baseUrl += '/'
+    res.redirect(`${baseUrl}`)
+}
+
 async function loggedInUser(req, res, next) {
     if (! await sessionsHelper.hasLoggedIn(req)) {
         // urlを保存
@@ -116,6 +133,16 @@ async function correctUser(req, res, next) {
     const userId = req.params.userId
     const user = await User.find(userId)
     if (! await sessionsHelper.isCurrentUser(req, user)) {
+        // root画面にredirect
+        res.redirect('/')
+    } else {
+        next()
+    }
+}
+
+async function adminUser(req, res, next) {
+    const currentUser = await sessionsHelper.currentUser(req)
+    if (!currentUser.admin) {
         // root画面にredirect
         res.redirect('/')
     } else {
