@@ -15,7 +15,9 @@ exports.seed = async function (knex) {
     email: 'example@railstutorial.org',
     password: 'foobar',
     passwordConfirmation: 'foobar',
-    admin: true
+    admin: true,
+    activated: true,
+    activatedAt: knex.fn.now()
   })
 
   // 追加のユーザーをまとめて生成する
@@ -27,7 +29,9 @@ exports.seed = async function (knex) {
       name: name,
       email: email,
       password: password,
-      passwordConfirmation: password
+      passwordConfirmation: password,
+      activated: true,
+      activatedAt: knex.fn.now()
     })
   }
 }

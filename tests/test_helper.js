@@ -51,7 +51,9 @@ async function setupUsers() {
             email: 'michael@example.com',
             password: 'password',
             passwordConfirmation: 'password',
-            admin: true
+            admin: true,
+            activated: true,
+            activatedAt: knex.fn.now()
         }
     )
 
@@ -60,7 +62,9 @@ async function setupUsers() {
             name: 'Sterling Archer',
             email: 'duchess@example.gov',
             password: 'password',
-            passwordConfirmation: 'password'
+            passwordConfirmation: 'password',
+            activated: true,
+            activatedAt: knex.fn.now()
         }
     )
 
@@ -69,7 +73,9 @@ async function setupUsers() {
             name: 'Lana Kane',
             email: 'hands@example.gov',
             password: 'password',
-            passwordConfirmation: 'password'
+            passwordConfirmation: 'password',
+            activated: true,
+            activatedAt: knex.fn.now()
         }
     )
 
@@ -78,7 +84,9 @@ async function setupUsers() {
             name: 'Malory Archer',
             email: 'boss@example.gov',
             password: 'password',
-            passwordConfirmation: 'password'
+            passwordConfirmation: 'password',
+            activated: true,
+            activatedAt: knex.fn.now()
         }
     )
 
@@ -88,7 +96,9 @@ async function setupUsers() {
                 name: `User ${i}`,
                 email: `user-${i}@example.com`,
                 password: 'password',
-                passwordConfirmation: 'password'
+                passwordConfirmation: 'password',
+                activated: true,
+                activatedAt: knex.fn.now()
             }
         )
     }

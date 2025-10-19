@@ -19,6 +19,10 @@ class User extends RecordBase {
     admin
     createdAt // 自動で割り振られる
     updatedAt // 自動で割り振られる
+    activationToken
+    activationDigest
+    activated
+    activatedAt
 
     constructor(params = {}) {
         super()
@@ -27,6 +31,8 @@ class User extends RecordBase {
         this.#password = params.password
         this.#passwordConfirmation = params.passwordConfirmation
         this.admin = params.admin
+        this.activated = params.activated
+        this.activatedAt = params.activatedAt
     }
 
     // password関連のpropertyのgetter, setter methods
@@ -168,6 +174,8 @@ class User extends RecordBase {
             if ('password' in params) this.#password = params.password
             if ('passwordConfirmation' in params) this.#passwordConfirmation = params.passwordConfirmation
             if ('admin' in params) this.admin = params.admin
+            if ('activated' in params) this.activated = params.activated
+            if ('activatedAt' in params) this.activatedAt = params.activatedAt
             if (!await this.valid(true)) return false
 
             return this.#update()
@@ -200,7 +208,8 @@ class User extends RecordBase {
 
     async #insert() {
         try {
-            this.email = this.email.toLowerCase()
+            User.#downcaseEmail(this)
+            await this.#createActivationDigest()
             const params = this.#paramsToDB()
             const [res] = await knex('users').insert(params).returning('id')
             await this.#reload(res.id)
@@ -215,7 +224,7 @@ class User extends RecordBase {
 
     async #update() {
         try {
-            this.email = this.email.toLowerCase()
+            User.#downcaseEmail(this)
             const params = this.#paramsToDB()
             const [res] = await knex('users')
                 .where('id', this.id)
@@ -235,10 +244,16 @@ class User extends RecordBase {
         if (User.#presence(this.#password)) {
             // passwordをhash化する
             const hash = User.digest(this.#password)
-            return { name: this.name, email: this.email, admin: !!this.admin, password_digest: hash }
+            return {
+                name: this.name, email: this.email, password_digest: hash, admin: !!this.admin,
+                activation_digest: this.activationDigest, activated: this.activated, activated_at: this.activatedAt
+            }
         }
         else {
-            return { name: this.name, email: this.email, admin: !!this.admin }
+            return {
+                name: this.name, email: this.email, admin: !!this.admin,
+                activation_digest: this.activationDigest, activated: this.activated, activated_at: this.activatedAt
+            }
         }
     }
 
@@ -270,13 +285,14 @@ class User extends RecordBase {
     }
 
     dup() {
+        // id 以外はコピーする
         const u = new User()
-        u.name = this.name
-        u.email = this.email
+        Object.assign(u, this)
+        u.id = undefined
+        // private propertyをコピーする
         u.#password = this.#password
         u.#passwordConfirmation = this.#passwordConfirmation
         u.#passwordDigest = this.#passwordDigest
-        u.admin = this.admin
         return u
     }
 
@@ -308,13 +324,17 @@ class User extends RecordBase {
     }
 
     async #uniqueness(conds) {
-        if (conds.email) conds.email = conds.email.toLowerCase()
         const temp = await User.findBy(conds)
         if (temp.length == 0) return true
         else if (temp.length == 1) {
             return temp.id !== this.id
         }
         return false
+    }
+
+    async #createActivationDigest() {
+        this.activationToken = await User.newToken()
+        this.activationDigest = User.digest(this.activationToken)
     }
 
     // static methods
@@ -339,6 +359,7 @@ class User extends RecordBase {
 
     static async findBy(params = {}) {
         try {
+            User.#downcaseEmail(params)
             const li = await knex('users').select('*').where(params)
             return li.map(o => User.#dbToUserObject(o))
         } catch (e) {
@@ -363,11 +384,14 @@ class User extends RecordBase {
             u.id = obj.id
             u.name = obj.name
             u.email = obj.email
-            u.createdAt = obj.created_at
-            u.updatedAt = obj.updated_at
             u.#passwordDigest = obj.password_digest
             u.rememberDigest = obj.remember_digest
             u.admin = obj.admin
+            u.createdAt = obj.created_at
+            u.updatedAt = obj.updated_at
+            u.activationDigest = obj.activation_digest
+            u.activated = obj.activated
+            u.activatedAt = obj.activated_at
             u.setSaved() // このidのuserは既にdbに存在するため
             return u
         } else {
@@ -430,6 +454,12 @@ class User extends RecordBase {
 
     static async newToken() {
         return await uid(16)
+    }
+
+    static #downcaseEmail(o) {
+        if (o.email) {
+            o.email = o.email.toLowerCase()
+        }
     }
 }
 
