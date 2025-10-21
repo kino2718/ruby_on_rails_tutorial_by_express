@@ -61,10 +61,9 @@ async function create(req, res) {
     const user = new User(userParams)
     if (await user.save()) {
         // activation mail を出す
-        // baseUrlの最後の文字がいろいろな場所で '/' 有りだったり無しだったりしている。直すこと
-        let baseUrl = req.baseUrl
-        if (baseUrl.at(-1) === '/') baseUrl = baseUrl.slice(0, -1)
-        const mail = await userMailer.accountActivation(user, baseUrl)
+        let url = `${req.protocol}://${req.get('host')}`
+        if (url.at(-1) === '/') url = url.slice(0, -1)
+        const mail = await userMailer.accountActivation(user, url)
         await userMailer.deliverNow(mail)
         // flashの設定
         req.flash('info', 'Please check your email to activate your account.')
