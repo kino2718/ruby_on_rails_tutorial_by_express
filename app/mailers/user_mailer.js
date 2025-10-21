@@ -23,7 +23,8 @@ async function accountActivation(user, baseUrl) {
 
 async function deliverNow(mail) {
     // メールを送信する
-    await transporter.sendMail(mail)
+    const info = await transporter.sendMail(mail)
+    if (info && info.message) console.info('sendMail:\n', info.message.toString())
 }
 
 module.exports = {

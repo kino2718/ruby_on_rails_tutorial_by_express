@@ -19,7 +19,7 @@ class User extends RecordBase {
     admin
     createdAt // 自動で割り振られる
     updatedAt // 自動で割り振られる
-    activationToken
+    // activationToken // #reloadでundefinedになってしまうのでプロパティから外す
     activationDigest
     activated
     activatedAt

@@ -4,6 +4,7 @@ const User = require('../models/user')
 const applicationHelper = require('../helpers/application_helper')
 const csrfHelper = require('../helpers/csrf_helper')
 const sessionsHelper = require('../helpers/sessions_helper')
+const userMailer = require('../mailers/user_mailer')
 
 router.get('/', loggedInUser, async (req, res) => {
     await index(req, res)
@@ -55,27 +56,20 @@ function newUser(req, res) {
     res.render('users/new', { title: 'Sign up', user: user })
 }
 
-async function create(req, res, next) {
+async function create(req, res) {
     const userParams = filterSafeParams(req.body.user)
     const user = new User(userParams)
     if (await user.save()) {
-        // session idをリセット
-        req.session.regenerate(err => {
-            if (err) {
-                next(err)
-                return
-            }
-            // ログイン
-            sessionsHelper.logIn(req.session, user)
-
-            // flashの設定
-            req.flash('success', 'Welcome to the Sample App!')
-
-            // ユーザ画面にredirectする
-            let baseUrl = req.baseUrl
-            if (baseUrl.at(-1) !== '/') baseUrl += '/'
-            res.redirect(`${baseUrl}${user.id}`)
-        })
+        // activation mail を出す
+        // baseUrlの最後の文字がいろいろな場所で '/' 有りだったり無しだったりしている。直すこと
+        let baseUrl = req.baseUrl
+        if (baseUrl.at(-1) === '/') baseUrl = baseUrl.slice(0, -1)
+        const mail = await userMailer.accountActivation(user, baseUrl)
+        await userMailer.deliverNow(mail)
+        // flashの設定
+        req.flash('info', 'Please check your email to activate your account.')
+        // root画面にredirect
+        res.redirect('/')
     } else {
         res.status(422).render('users/new', { title: 'Sign up', user: user })
     }
