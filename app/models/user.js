@@ -302,9 +302,10 @@ class User extends RecordBase {
         this.rememberToken = rememberToken
     }
 
-    isAuthenticated(rememberToken) {
-        if (!rememberToken || !this.rememberDigest) return false
-        return bcrypt.compareSync(rememberToken, this.rememberDigest)
+    isAuthenticated(attribute, token) {
+        const digest = this[`${attribute}Digest`]
+        if (!digest) return false
+        return bcrypt.compareSync(token, digest)
     }
 
     async forget() {

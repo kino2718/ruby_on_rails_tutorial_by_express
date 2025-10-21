@@ -33,7 +33,7 @@ async function currentUser(req) {
     if (userId) {
         const user = await User.find(userId)
         const rememberToken = req.cookies.rememberToken
-        if (user && user.isAuthenticated(rememberToken)) {
+        if (user && user.isAuthenticated('remember', rememberToken)) {
             logIn(req.session, user)
             req.currentUser = user
             return req.currentUser
