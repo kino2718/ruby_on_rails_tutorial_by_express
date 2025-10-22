@@ -30,23 +30,32 @@ async function create(req, res, next) {
     if (users && users.length === 1) {
         const user = users[0]
         if (user.authenticate(sessionParams.password)) {
-            const forwardingUrl = req.session.forwardingUrl
-            // session idをリセット
-            req.session.regenerate(async err => {
-                if (err) {
-                    next(err)
-                    return
-                }
+            if (user.activated) {
+                const forwardingUrl = req.session.forwardingUrl
+                // session idをリセット
+                req.session.regenerate(async err => {
+                    if (err) {
+                        next(err)
+                        return
+                    }
 
-                const rememberMe = sessionParams['remember_me']
-                if (rememberMe === '1') await sessionsHelper.remember(res, user)
-                else await sessionsHelper.forget(res, user)
+                    const rememberMe = sessionParams['remember_me']
+                    if (rememberMe === '1') await sessionsHelper.remember(res, user)
+                    else await sessionsHelper.forget(res, user)
 
-                sessionsHelper.logIn(req.session, user)
-                const url = forwardingUrl || `/users/${user.id}`
-                res.redirect(url)
-            })
-            return
+                    sessionsHelper.logIn(req.session, user)
+                    const url = forwardingUrl || `/users/${user.id}`
+                    res.redirect(url)
+                })
+                return
+            }
+             else {
+                // flashの設定
+                req.flash('warning', 'Account not activated. Check your email for the activation link.')
+                // root画面にredirect
+                res.redirect('/')
+                return
+            }
         }
     }
     // error処理

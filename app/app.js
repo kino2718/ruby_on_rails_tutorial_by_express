@@ -4,6 +4,7 @@ const path = require('path')
 const staticPagesController = require('./controllers/static_pages_controller')
 const usersController = require('./controllers/users_controller')
 const sessionsController = require('./controllers/sessions_controller')
+const accountActivationController = require('./controllers/account_activations_controller')
 const applicationHelper = require('./helpers/application_helper')
 const templatesHelper = require('./helpers/templates_helper')
 const sessionsHelper = require('./helpers/sessions_helper')
@@ -82,5 +83,6 @@ app.locals.paginate = templatesHelper.paginate
 app.use('/', staticPagesController.router)
 app.use('/users', usersController.router)
 app.use('/', sessionsController.router)
+app.use('/account_activations', accountActivationController.router)
 
 module.exports = app

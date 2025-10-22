@@ -22,6 +22,8 @@ describe('users edit test', () => {
                 email: 'michael@example.com',
                 password: 'password',
                 passwordConfirmation: 'password',
+                activated: true,
+                activatedAt: knex.fn.now()
             })
         await user.save()
     })

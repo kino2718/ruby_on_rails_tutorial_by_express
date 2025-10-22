@@ -22,7 +22,9 @@ describe('users controller test', () => {
                 email: 'michael@example.com',
                 password: 'password',
                 passwordConfirmation: 'password',
-                admin: true
+                admin: true,
+                activated: true,
+                activatedAt: knex.fn.now()
             })
         await user.save()
 
@@ -32,6 +34,8 @@ describe('users controller test', () => {
                 email: 'duchess@example.gov',
                 password: 'password',
                 passwordConfirmation: 'password',
+                activated: true,
+                activatedAt: knex.fn.now()
             })
         await otherUser.save()
     })
