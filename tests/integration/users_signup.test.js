@@ -2,25 +2,36 @@ const request = require('supertest')
 const cheerio = require('cheerio')
 const app = require('../../app/app')
 const User = require('../../app/models/user')
+const knexUtils = require('../../app/db/knex_utils')
+const knex = knexUtils.knex
+const testHelper = require('../test_helper')
+const transporterFactory = require('../../app/mailers/transporter_factory')
 
-const SUCCESS = 200
 const UNPROCESSABLE_ENTITY = 422
 
 describe('users signup test', () => {
+    // test用のmock
+    const transporter = transporterFactory.createTransporter()
+
+    beforeEach(async () => {
+        await knex('users').del()
+        transporter.clear()
+    })
+
+    function isUsersNewTemplate(res) {
+        const $ = cheerio.load(res.text)
+        const haveFormAction = $('form[action="/users"]').length > 0
+        return haveFormAction
+    }
+
     test('invalid signup information', async () => {
-        const agent = request.agent(app) // sessionを維持するために必要
-
-        // /signupにアクセスしcrfs tokenを取得
-        let res = await agent.get('/signup')
-        expect(res.status).toBe(SUCCESS)
-        let $ = cheerio.load(res.text)
-        const csrfToken = $('input[name="_csrf"]').val()
-
+        const agent = request.agent(app)
+        const csrfToken = await testHelper.getCsrfToken(agent)
         // 現在のユーザ数を取得
         const beforeCount = await User.count()
 
         // 失敗するsign upのpost
-        res = await agent
+        const res = await agent
             .post('/users')
             .type('form') // application/x-www-form-urlencoded
             .send({
@@ -38,26 +49,16 @@ describe('users signup test', () => {
         expect(afterCount).toBe(beforeCount)
 
         // ページの内容の確認
-        $ = cheerio.load(res.text)
-        expect($('form[action="/users"]').length).toBe(1)
-        expect($('input[name="user[name]"]').length).toBe(1)
-
+        expect(isUsersNewTemplate(res)).toBe(true)
+        const $ = cheerio.load(res.text)
+        expect($('div#error_explanation').length).toBeGreaterThan(0)
+        expect($('div.field_with_errors').length).toBeGreaterThan(0)
     })
 
-    test('valid signup information', async () => {
-        const agent = request.agent(app) // sessionを維持するために必要
-
-        // /signupにアクセスしcrfs tokenを取得
-        let res = await agent.get('/signup')
-        expect(res.status).toBe(SUCCESS)
-        let $ = cheerio.load(res.text)
-        const csrfToken = $('input[name="_csrf"]').val()
-
-        // 現在のユーザ数を取得
-        const beforeCount = await User.count()
-
+    async function validSignup(agent) {
+        const csrfToken = await testHelper.getCsrfToken(agent)
         // 成功するsign upのpost
-        res = await agent
+        const res = await agent
             .post('/users')
             .type('form') // application/x-www-form-urlencoded
             .send({
@@ -67,42 +68,76 @@ describe('users signup test', () => {
                 'user[password]': 'password',
                 'user[passwordConfirmation]': 'password'
             })
+        return res
+    }
 
-        // ステータスコード (REDIRECT = 302)の確認
-        expect(res.status).toBe(302)
-        /*
-                // リダイレクト先にアクセスして確認
-                res = await agent.get(res.headers.location)
-                expect(res.status).toBe(SUCCESS)
-
-                // ユーザ数が1人増えたことの確認
-                const afterCount = await User.count()
-                expect(afterCount).toBe(beforeCount + 1)
-
-                // ページの内容の確認
-                $ = cheerio.load(res.text)
-                expect($('.gravatar').length).toBe(1)
-
-                // ログイン状態を確認。sessionにアクセスするのは難しいので表示内容で判断する
-                // <a href="/login">Log in</a> が存在しないことを確認
-                expect($('a[href="/login"]').length).toBe(0)
-
-                // <form action="/logout" method="POST"> が存在することを確認
-                const form = $('form[action="/logout"][method="POST"]')
-                expect(form.length).toBe(1)
-
-                // <a href="/users/?">Profile</a> が存在することを確認
-                const users = await User.findBy({ email: 'user@example.com' })
-                expect(users.length).toBe(1)
-                const user = users[0]
-                expect($(`a[href="/users/${user.id}"]`).length).toBe(1)
-        */
-        // 登録したユーザーを削除
-        await knex('users').del()
+    test('valid signup information with account activation', async () => {
+        const agent = request.agent(app)
+        // 現在のユーザ数を取得
+        const beforeCount = await User.count()
+        await validSignup(agent)
+        // ユーザ数が増えていることの確認
+        const afterCount = await User.count()
+        expect(afterCount).toBe(beforeCount + 1)
+        // validation mailの件数を確認
+        const mailCount = transporterFactory.mockTransporter.count
+        expect(mailCount).toBe(1)
     })
 
-    const knexUtils = require('../../app/db/knex_utils')
-    const knex = knexUtils.knex
+    test('should not be activated', async () => {
+        const agent = request.agent(app)
+        await validSignup(agent)
+        const users = await User.findBy({ email: 'user@example.com' })
+        expect(users.length).toBe(1)
+        const user = users[0]
+        expect(user.activated).toBeFalsy()
+    })
+
+    test('should not be able to log in before account activation', async () => {
+        const agent = request.agent(app)
+        await validSignup(agent)
+        await testHelper.logInAs(agent, 'user@example.com', 'password')
+        expect(await testHelper.isLoggedIn(agent)).toBe(false)
+    })
+
+    async function activation(agent, token, email) {
+        const res = await agent.get(`/account_activations/${token}/edit?email=${email}`)
+        return res
+    }
+
+    test('should not be able to log in with invalid activation token', async () => {
+        const agent = request.agent(app)
+        await validSignup(agent)
+        await testHelper.logInAs(agent, 'user@example.com', 'password')
+        await activation(agent, 'invalid token', 'user@example.com')
+        expect(await testHelper.isLoggedIn(agent)).toBe(false)
+    })
+
+    function getToken() {
+        const mail = transporterFactory.mockTransporter.mail.text
+        if (!mail) return ''
+        const match = mail.match(/\/account_activations\/([^/]+)\/edit/)
+        const token = match?.at(1)
+        return token
+    }
+
+    test('should not be able to log in with invalid email', async () => {
+        const agent = request.agent(app)
+        await validSignup(agent)
+        await testHelper.logInAs(agent, 'user@example.com', 'password')
+        const token = getToken()
+        await activation(agent, token, 'wrong')
+        expect(await testHelper.isLoggedIn(agent)).toBe(false)
+    })
+
+    test('should log in successfully with valid activation token and email', async () => {
+        const agent = request.agent(app)
+        await validSignup(agent)
+        await testHelper.logInAs(agent, 'user@example.com', 'password')
+        const token = getToken()
+        await activation(agent, token, 'user@example.com')
+        expect(await testHelper.isLoggedIn(agent)).toBe(true)
+    })
 
     afterAll(async () => {
         await knex.destroy() // コネクションを閉じる

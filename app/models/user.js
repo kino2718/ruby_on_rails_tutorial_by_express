@@ -4,6 +4,7 @@ const debugLog = knexUtils.debugLog
 const bcrypt = require('bcryptjs')
 const RecordBase = require('./record_base')
 const uid = require('uid-safe')
+const userMailer = require('../mailers/user_mailer')
 
 class User extends RecordBase {
     id // 自動で割り振られる。user.id = 3 等の id の手動での変更は save 時にエラーになる。変更しないこと
@@ -189,6 +190,7 @@ class User extends RecordBase {
             try {
                 if (key === 'email') value = value.toLowerCase()
                 if (key === 'rememberDigest') key = 'remember_digest'
+                if (key === 'activatedAt') key = 'activated_at'
                 const params = { [key]: value }
                 const [res] = await knex('users')
                     .where('id', this.id)
@@ -336,6 +338,16 @@ class User extends RecordBase {
     async #createActivationDigest() {
         this.activationToken = await User.newToken()
         this.activationDigest = User.digest(this.activationToken)
+    }
+
+    async activate() {
+        await this.updateAttribute('activated', true)
+        await this.updateAttribute('activatedAt', knex.fn.now())
+    }
+
+    async sendActivationEmail(url) {
+        const mail = await userMailer.accountActivation(this, url)
+        await userMailer.deliverNow(mail)
     }
 
     // static methods

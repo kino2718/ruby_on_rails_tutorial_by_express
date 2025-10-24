@@ -28,17 +28,36 @@ describe('users login test', () => {
         await user.save()
     })
 
-    test('login with valid email/invalid password', async () => {
-        const agent = request.agent(app) // session維持のため必要
-
-        // loginにアクセスしてcrfs tokenを取得
+    async function accessLoginPath(agent) {
         let res = await agent.get('/login')
-        expect(res.status).toBe(SUCCESS)
-        let $ = cheerio.load(res.text)
-        const csrfToken = $('input[name="_csrf"]').val()
+        return res
+    }
 
+    function isLoginTemplate(res) {
+        const $ = cheerio.load(res.text)
+        const titleText = $('title').text()
+        // タイトルが含まれているか確認
+        return titleText.includes('Log in')
+    }
+
+    function getNumFlash(res, type) {
+        // flashがあることの確認
+        let $ = cheerio.load(res.text)
+        return $(`.alert.alert-${type}`).length
+    }
+
+    test('login path', async () => {
+        const agent = request.agent(app)
+        let res = await accessLoginPath(agent)
+        expect(res.status).toBe(SUCCESS)
+        expect(isLoginTemplate(res)).toBe(true)
+    })
+
+    test('login with valid email/invalid password', async () => {
+        const agent = request.agent(app)
+        const csrfToken = await testHelper.getCsrfToken(agent)
         // 無効なlog in
-        res = await agent
+        let res = await agent
             .post('/login')
             .type('form')
             .send({
@@ -46,40 +65,27 @@ describe('users login test', () => {
                 'session[email]': user.email,
                 'session[password]': 'invalid'
             })
+        // ログインしていないことの確認
+        const isLoggedIn = await testHelper.isLoggedIn(agent)
+        expect(isLoggedIn).toBe(false)
         // ステータスコード (unprocessable_entity = 422)の確認
         expect(res.status).toBe(UNPROCESSABLE_ENTITY)
-
-        // log in画面が表示されていることの確認
-        $ = cheerio.load(res.text)
-        expect($('form[action="/login"]').length).toBe(1)
-        expect($('input[name="session[email]"]').length).toBe(1)
-
+        // ログイン画面に戻っていることの確認
+        expect(isLoginTemplate(res)).toBe(true)
         // flashがあることの確認
-        // 要素が存在するか確認
-        expect($('.alert.alert-danger').length).toBe(1)
-        // テキストが期待通りか確認
-        // expect($('.alert.alert-danger').text()).toContain('Invalid email/password combination')
+        expect(getNumFlash(res, 'danger')).toBe(1)
 
         // rootにアクセス
-        res = await agent.get('/login')
+        res = await agent.get('/')
         expect(res.status).toBe(SUCCESS)
         // flashが無いことの確認
-        // 要素が存在するか確認
-        $ = cheerio.load(res.text)
-        expect($('.alert.alert-danger').length).toBe(0)
+        expect(getNumFlash(res, 'danger')).toBe(0)
     })
 
-    test('login with valid information followed by logout', async () => {
-        const agent = request.agent(app) // session維持のため必要
-
-        // loginにアクセスしてcrfs tokenを取得
-        let res = await agent.get('/login')
-        expect(res.status).toBe(SUCCESS)
-        let $ = cheerio.load(res.text)
-        let csrfToken = $('input[name="_csrf"]').val()
-
+    async function validLogin(agent, user) {
+        const csrfToken = await testHelper.getCsrfToken(agent)
         // 有効なlog in
-        res = await agent
+        const res = await agent
             .post('/login')
             .type('form')
             .send({
@@ -87,72 +93,99 @@ describe('users login test', () => {
                 'session[email]': user.email,
                 'session[password]': user.password
             })
+        return res
+    }
 
-        // ステータスコード (REDIRECT = 302)の確認
+    test('valid login', async () => {
+        const agent = request.agent(app)
+        const res = await validLogin(agent, user)
+        // ログインしていることの確認
+        const isLoggedIn = await testHelper.isLoggedIn(agent)
+        expect(isLoggedIn).toBe(true)
+        // redirect先の確認
         expect(res.status).toBe(REDIRECT)
+        expect(res.headers.location).toBe(`/users/${user.id}`)
+    })
 
-        // リダイレクト先にアクセスして確認
+    function isUsersShowTemplate(res, user) {
+        const $ = cheerio.load(res.text)
+        const titleText = $('title').text()
+        // タイトルにユーザー名が含まれているか確認
+        return titleText.includes(user.name)
+    }
+
+    function getNumAnchor(res, href) {
+        // hrefへのanchorの数を確認
+        const $ = cheerio.load(res.text)
+        return $(`a[href="${href}"]`).length
+    }
+
+    function getNumForm(res, action) {
+        // formのactionの数を確認
+        const $ = cheerio.load(res.text)
+        return $(`form[action="${action}"][method="POST"]`).length
+    }
+
+    test('redirect after login', async () => {
+        const agent = request.agent(app)
+        let res = await validLogin(agent, user)
+        // リダイレクト先にアクセス
         res = await agent.get(res.headers.location)
         expect(res.status).toBe(SUCCESS)
+        expect(isUsersShowTemplate(res, user)).toBe(true)
+        expect(getNumAnchor(res, '/login')).toBe(0)
+        expect(getNumForm(res, '/logout')).toBe(1)
+        expect(getNumAnchor(res, `/users/${user.id}`)).toBe(1)
+    })
 
-        // ユーザーのページを表示していることを確認
-        $ = cheerio.load(res.text)
-        expect($('.gravatar').length).toBe(1)
-
-        // <a href="/login">Log in</a> が存在しないことを確認
-        expect($('a[href="/login"]').length).toBe(0)
-
-        // <form action="/logout" method="POST"> が存在することを確認
-        let form = $('form[action="/logout"][method="POST"]')
-        expect(form.length).toBe(1)
-
-        // <a href="/users/?">Profile</a> が存在することを確認
-        expect($(`a[href="/users/${user.id}"]`).length).toBe(1)
-
-        // ログアウト
-        // csrf tokenを取得
-        csrfToken = $('input[name="_csrf"]').val()
-        res = await agent
+    async function logOut(agent) {
+        const csrfToken = await testHelper.getCsrfToken(agent)
+        const res = await agent
             .post('/logout')
             .type('form')
             .send({
                 _csrf: csrfToken,
             })
+        return res
+    }
 
-        // ステータスコード (REDIRECT = 302)の確認
+    test('successful logout', async () => {
+        const agent = request.agent(app)
+        await validLogin(agent, user)
+        let res = await logOut(agent)
+        // ログアウトしていることの確認
+        const isLoggedIn = await testHelper.isLoggedIn(agent)
+        expect(isLoggedIn).toBe(false)
+        // redirect先の確認
         expect(res.status).toBe(REDIRECT)
+        expect(res.headers.location).toBe('/')
+    })
 
+    test('redirect after logout', async () => {
+        const agent = request.agent(app)
+        await validLogin(agent, user)
+        let res = await logOut(agent)
         // リダイレクト先にアクセスして確認
         res = await agent.get(res.headers.location)
         expect(res.status).toBe(SUCCESS)
+        expect(getNumAnchor(res, '/login')).toBe(1)
+        expect(getNumForm(res, '/logout')).toBe(0)
+        expect(getNumAnchor(res, `/users/${user.id}`)).toBe(0)
+    })
 
-        // root ページを表示していることを確認
-        $ = cheerio.load(res.text)
-        expect($('title').text().trim()).toBe('Ruby on Rails Tutorial Sample App')
-
-        // 2番目のウィンドウでログアウトをクリックするユーザーをシミュレートする
-        res = await agent
-            .post('/logout')
-            .type('form')
-            .send({
-                _csrf: csrfToken,
-            })
-        // ステータスコード (REDIRECT = 302)の確認
+    test('should still work after logout in second window', async () => {
+        const agent = request.agent(app)
+        await validLogin(agent, user)
+        await logOut(agent)
+        // 別のwindowで再度ログアウトすることを想定
+        const res = await logOut(agent)
+        // root画面にredirectされることを確認
         expect(res.status).toBe(REDIRECT)
-
-        // <a href="/login">Log in</a> が存在することを確認
-        expect($('a[href="/login"]').length).toBe(1)
-
-        // <form action="/logout" method="POST"> が存在しないことを確認
-        form = $('form[action="/logout"][method="POST"]')
-        expect(form.length).toBe(0)
-
-        // <a href="/users/?">Profile</a> が存在しないことを確認
-        expect($(`a[href="/users/${user.id}"]`).length).toBe(0)
+        expect(res.headers.location).toBe('/')
     })
 
     test('login with remembering', async () => {
-        const agent = request.agent(app) // session維持のため必要
+        const agent = request.agent(app)
         let res = await testHelper.logInAs(agent, user.email, user.password, '1')
 
         // Set-Cookie ヘッダの配列を取得
@@ -166,7 +199,7 @@ describe('users login test', () => {
 
 
     test('login without remembering', async () => {
-        const agent = request.agent(app) // session維持のため必要
+        const agent = request.agent(app)
         let res = await testHelper.logInAs(agent, user.email, user.password, '1')
 
         // Cookieが削除されていることを検証

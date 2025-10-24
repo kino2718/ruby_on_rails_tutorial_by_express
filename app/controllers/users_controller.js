@@ -4,7 +4,6 @@ const User = require('../models/user')
 const applicationHelper = require('../helpers/application_helper')
 const csrfHelper = require('../helpers/csrf_helper')
 const sessionsHelper = require('../helpers/sessions_helper')
-const userMailer = require('../mailers/user_mailer')
 
 router.get('/', loggedInUser, async (req, res) => {
     await index(req, res)
@@ -63,8 +62,7 @@ async function create(req, res) {
         // activation mail を出す
         let url = `${req.protocol}://${req.get('host')}`
         if (url.at(-1) === '/') url = url.slice(0, -1)
-        const mail = await userMailer.accountActivation(user, url)
-        await userMailer.deliverNow(mail)
+        await user.sendActivationEmail(url)
         // flashの設定
         req.flash('info', 'Please check your email to activate your account.')
         // root画面にredirect

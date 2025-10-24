@@ -27,7 +27,7 @@ describe('sessions helper test', () => {
     test('login without remembering', async () => {
         const currentUser = await sessionsHelper.currentUser(mock)
         expect(currentUser.email).toBe(user.email)
-        expect(testHelper.isLoggedIn(mock)).toBeTruthy()
+        expect(testHelper.isLoggedInMock(mock)).toBeTruthy()
     })
 
     test('current user returns null when remember digest is wrong', async () => {

@@ -18,8 +18,14 @@ function mock() {
     }
 }
 
-function isLoggedIn(mock) {
+function isLoggedInMock(mock) {
     const userId = mock.session.userId
+    return !!userId
+}
+
+async function isLoggedIn(agent) {
+    const res = await agent.get('/test/session')
+    const userId = res.body.userId
     return !!userId
 }
 
@@ -106,9 +112,17 @@ async function setupUsers() {
     return users
 }
 
+async function getCsrfToken(agent) {
+    const res = await agent.get('/test/res/locals')
+    const locals = res.body
+    return locals.csrfToken
+}
+
 module.exports = {
     mock,
+    isLoggedInMock,
     isLoggedIn,
     logInAs,
     setupUsers,
+    getCsrfToken,
 }

@@ -72,6 +72,16 @@ app.use(async (req, res, next) => {
     next()
 })
 
+// test用にsessionを取得
+if (process.env.NODE_ENV === 'test') {
+    app.get('/test/session', (req, res) => {
+        res.json(req.session)
+    })
+    app.get('/test/res/locals', (req, res) => {
+        res.json(res.locals)
+    })
+}
+
 // register helper functions
 app.locals.fullTitle = templatesHelper.fullTitle
 app.locals.gravatarFor = templatesHelper.gravatarFor

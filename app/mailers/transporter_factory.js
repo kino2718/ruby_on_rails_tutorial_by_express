@@ -1,6 +1,22 @@
 const nodemailer = require('nodemailer')
 
+const mockTransporter = {
+    count: 0,
+    mail: {},
+    sendMail: function (mail) {
+        this.count++
+        this.mail = mail
+    },
+    clear: function () {
+        this.count = 0
+        this.mail = {}
+    }
+}
+
 function createTransporter() {
+    // test用mock
+    if (process.env.NODE_ENV === 'test') return mockTransporter
+
     const driver = process.env.MAIL_DRIVER || 'stream'
 
     if (driver === 'stream') {
@@ -27,4 +43,5 @@ function createTransporter() {
 
 module.exports = {
     createTransporter,
+    mockTransporter,
 }

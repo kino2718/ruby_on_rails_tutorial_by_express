@@ -1,8 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../models/user')
-const knexUtils = require('../db/knex_utils')
-const knex = knexUtils.knex
 const sessionsHelper = require('../helpers/sessions_helper')
 
 router.get('/:activationToken/edit', async (req, res) => {
@@ -15,8 +13,7 @@ async function edit(req, res) {
     const users = await User.findBy({ email: email })
     const user = users?.at(0)
     if (user && !user.activated && user.isAuthenticated('activation', token)) {
-        user.updateAttribute('activated', true)
-        user.updateAttribute('activatedAt', knex.fn.now())
+        await user.activate()
         // login
         sessionsHelper.logIn(req.session, user)
         // flashの設定
