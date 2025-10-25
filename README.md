@@ -13,12 +13,16 @@ JavaScript と Express で実装した Web アプリです。
 -   knex: SQL query builder. 開発環境用の Sqlite3 と プロダクト環境用の PostgreSQL を共存させるために使用。
     直接 SQL を書かなくても良くなる。
 -   express_session: セッション管理用。
+-   cookie-parser: Cookie管理用。
 -   csrf: CSRF 対策用。
 -   dotenv: 環境変数用。
 -   connect-flash: flash 表示用。
 -   bcryptjs: password 等の hash 化用。
--   package.json script の watch 用。
+-   nodemon: package.json script の watch 用。
 -   eslint, @eslint/js, globals: Lint用。
+-   @faker-js/faker: サンプルユーザの名前作成用。
+-   nodemailer: メール送信用。
+-   uid-safe: token作成用。
 
 ## ローカルでの使い方
 
@@ -45,6 +49,13 @@ PORT=3001 npm start
 -   SQLITE_FILENAME: sqlite3 のデータベースのファイル名を指定します。指定のない場合は `./db/development.sqlite3` が使用されます。
 -   SESSION_SECRET: セッション管理用の秘密鍵です。
 -   COOKIE_SECRET: Cookie署名用の秘密鍵です。
+-   MAIL_DRIVER: メールサーバーを指定します。stream: Appサーバーログ出力。smtp: 以下で指定するSMTPサーバー
+-   SMTP_PORT: SMTPサーバーのポート。
+-   SMTP_HOST: SMTPサーバーのアドレス。
+-   SMTP_SECURE: true: 接続にTLSを使用。
+-   SMTP_USER: SMTPサーバーのユーザー名。
+-   SMTP_PASS: SMTPサーバーのパスワード。
+
 
 ## .scss ファイルのトランスパイル方法
 
@@ -144,3 +155,19 @@ $ npm run lint:watch
 ```
 
 とすると、JavaScript ファイルを変更すると自動的に Lint が走ります。
+
+## メール送信
+
+ユーザーアカウント作成時のメールアドレス確認とパスワードの再設定にメールを利用します。
+
+メール出力は 2種類あり環境変数 MAIL_DRIVER で切り替えます。
+なお NODE_ENV==='test' の場合は無条件にテスト用mockにメールを出力します。
+-   stream: App サーバーのログ出力
+-   smtp: SMTP サーバーへ出力
+
+SMTP サーバーを使用する場合は以下の環境変数を設定して下さい。
+-   SMTP_PORT: SMTPサーバーのポート
+-   SMTP_HOST: SMTPサーバーのアドレス
+-   SMTP_SECURE: true: 接続にTLSを使用
+-   SMTP_USER: SMTPサーバーのユーザー名
+-   SMTP_PASS: SMTPサーバーのパスワード
