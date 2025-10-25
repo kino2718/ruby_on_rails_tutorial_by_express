@@ -24,6 +24,8 @@ class User extends RecordBase {
     activationDigest
     activated
     activatedAt
+    resetDigest
+    resetSentAt
 
     constructor(params = {}) {
         super()
@@ -34,6 +36,7 @@ class User extends RecordBase {
         this.admin = params.admin
         this.activated = params.activated
         this.activatedAt = params.activatedAt
+        this.resetSentAt = params.resetSentAt
     }
 
     // password関連のpropertyのgetter, setter methods
@@ -177,6 +180,7 @@ class User extends RecordBase {
             if ('admin' in params) this.admin = params.admin
             if ('activated' in params) this.activated = params.activated
             if ('activatedAt' in params) this.activatedAt = params.activatedAt
+            if ('resetSentAt' in params) this.resetSentAt = params.resetSentAt
             if (!await this.valid(true)) return false
 
             return this.#update()
@@ -191,6 +195,7 @@ class User extends RecordBase {
                 if (key === 'email') value = value.toLowerCase()
                 if (key === 'rememberDigest') key = 'remember_digest'
                 if (key === 'activatedAt') key = 'activated_at'
+                if (key === 'resetSentAt') key = 'reset_sent_at'
                 const params = { [key]: value }
                 const [res] = await knex('users')
                     .where('id', this.id)
@@ -243,20 +248,18 @@ class User extends RecordBase {
     }
 
     #paramsToDB() {
+        const toDB = {
+            name: this.name, email: this.email, admin: !!this.admin,
+            activation_digest: this.activationDigest, activated: this.activated, activated_at: this.activatedAt,
+            reset_digest: this.resetDigest, reset_sent_at: this.resetSentAt
+        }
+
         if (User.#presence(this.#password)) {
             // passwordをhash化する
             const hash = User.digest(this.#password)
-            return {
-                name: this.name, email: this.email, password_digest: hash, admin: !!this.admin,
-                activation_digest: this.activationDigest, activated: this.activated, activated_at: this.activatedAt
-            }
+            toDB.password_digest = hash
         }
-        else {
-            return {
-                name: this.name, email: this.email, admin: !!this.admin,
-                activation_digest: this.activationDigest, activated: this.activated, activated_at: this.activatedAt
-            }
-        }
+        return toDB
     }
 
     async reload() {
@@ -405,6 +408,7 @@ class User extends RecordBase {
             u.activationDigest = obj.activation_digest
             u.activated = obj.activated
             u.activatedAt = obj.activated_at
+            u.resetDigest = obj.reset_digest
             u.setSaved() // このidのuserは既にdbに存在するため
             return u
         } else {

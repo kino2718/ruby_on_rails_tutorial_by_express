@@ -1,6 +1,32 @@
 <%- include('../layouts/header') -%>
 
-    <h1>PasswordResets#new</h1>
-    <p>Find me in app/views/password_resets/new.ejs</p>
+<h1>Forgot password</h1>
+
+<div class="row">
+    <div class="col-md-6 offset-3">
+        <form action="/password_resets" accept-charset="UTF-8" method="post">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
+
+            <%- makeFormLabel(
+                undefined,
+                'email',
+                'password_reset_email',
+                'Email'
+            ) %>
+
+            <%- makeFormInput(
+                undefined,
+                'email',
+                'email',
+                'password_reset[email]',
+                'password_reset_email'
+            ) %>
+
+            <input type="submit" name="commit" value="Submit" class="btn btn-primary" />
+        </form>
+
+        <p>New user? <a href="/signup">Sign up now!</a></p>
+    </div>
+</div>
 
 <%- include('../layouts/footer') -%>

@@ -6,7 +6,7 @@ router.get('/new', async (req, res) => {
 })
 
 async function newPasswordResets(req, res) {
-    res.render('password_resets/new')
+    res.render('password_resets/new', {title: 'Forgot password'})
 }
 
 module.exports = {
