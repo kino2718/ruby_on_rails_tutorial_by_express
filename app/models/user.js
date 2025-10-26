@@ -180,6 +180,7 @@ class User extends RecordBase {
             if ('admin' in params) this.admin = params.admin
             if ('activated' in params) this.activated = params.activated
             if ('activatedAt' in params) this.activatedAt = params.activatedAt
+            if ('resetDigest' in params) this.resetDigest = params.resetDigest
             if ('resetSentAt' in params) this.resetSentAt = params.resetSentAt
             if (!await this.valid(true)) return false
 
@@ -195,6 +196,7 @@ class User extends RecordBase {
                 if (key === 'email') value = value.toLowerCase()
                 if (key === 'rememberDigest') key = 'remember_digest'
                 if (key === 'activatedAt') key = 'activated_at'
+                if (key === 'resetDigest') key = 'reset_digest'
                 if (key === 'resetSentAt') key = 'reset_sent_at'
                 const params = { [key]: value }
                 const [res] = await knex('users')
@@ -356,6 +358,8 @@ class User extends RecordBase {
     async createResetDigest() {
         this.resetToken = await User.newToken()
         this.resetDigest = User.digest(this.resetToken)
+        await this.updateAttribute('resetDigest', this.resetDigest)
+        await this.updateAttribute('resetSentAt', knex.fn.now())
     }
 
     async sendPasswordResetEmail(url) {
@@ -419,6 +423,7 @@ class User extends RecordBase {
             u.activated = obj.activated
             u.activatedAt = obj.activated_at
             u.resetDigest = obj.reset_digest
+            u.resetSentAt = obj.reset_sent_at
             u.setSaved() // このidのuserは既にdbに存在するため
             return u
         } else {

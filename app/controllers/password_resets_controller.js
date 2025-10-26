@@ -12,6 +12,10 @@ router.post('/', csrfHelper.verifyCsrfToken, async (req, res) => {
     await create(req, res)
 })
 
+router.get('/:resetToken/edit', async (req, res) => {
+    await edit(req, res)
+})
+
 async function newPasswordResets(req, res) {
     res.render('password_resets/new', { title: 'Forgot password' })
 }
@@ -30,6 +34,27 @@ async function create(req, res) {
         res.locals.flash = { danger: ['Email address not found'] }
         res.status(422).render('password_resets/new', { title: 'Forgot password' })
     }
+}
+
+async function edit(req, res) {
+    const token = req.params.resetToken
+    const email = req.query.email
+    const user = await getUser(email)
+    if (validUser(user, token)) {
+        res.render(`password_resets/edit`, { user, resetToken: token })
+    }
+    else {
+        res.redirect('/')
+    }
+}
+
+async function getUser(email) {
+    const users = await User.findBy({ email: email })
+    return users?.at(0)
+}
+
+function validUser(user, token) {
+    return user && user.activated && user.isAuthenticated('reset', token)
 }
 
 module.exports = {
