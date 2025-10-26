@@ -24,7 +24,14 @@ function _normalize(obj) {
     // または return obj ? { ...obj } : obj
 }
 
+function getFullUrl(req) {
+    let url = `${req.protocol}://${req.get('host')}`
+    if (url.at(-1) === '/') url = url.slice(0, -1)
+    return url
+}
+
 module.exports = {
     getDebugOutput,
     getDebugOutputParams,
+    getFullUrl,
 }

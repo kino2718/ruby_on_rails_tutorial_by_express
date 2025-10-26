@@ -353,6 +353,16 @@ class User extends RecordBase {
         await userMailer.deliverNow(mail)
     }
 
+    async createResetDigest() {
+        this.resetToken = await User.newToken()
+        this.resetDigest = User.digest(this.resetToken)
+    }
+
+    async sendPasswordResetEmail(url) {
+        const mail = await userMailer.passwordReset(this, url)
+        await userMailer.deliverNow(mail)
+    }
+
     // static methods
     static async create(params = {}) {
         const user = new User(params)

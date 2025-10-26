@@ -60,8 +60,7 @@ async function create(req, res) {
     const user = new User(userParams)
     if (await user.save()) {
         // activation mail を出す
-        let url = `${req.protocol}://${req.get('host')}`
-        if (url.at(-1) === '/') url = url.slice(0, -1)
+        const url = applicationHelper.getFullUrl(req)
         await user.sendActivationEmail(url)
         // flashの設定
         req.flash('info', 'Please check your email to activate your account.')
