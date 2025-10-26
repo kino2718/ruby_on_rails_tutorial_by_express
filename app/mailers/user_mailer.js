@@ -21,6 +21,23 @@ async function accountActivation(user, baseUrl) {
     }
 }
 
+async function passwordReset(user, baseUrl) {
+    const templateDir = path.join(__dirname, '../views/user_mailer')
+
+    // パスワードリセットリンクのメールを作成する
+    const mailAddr = encodeURIComponent(user.email)
+    const url = `${baseUrl}/password_resets/${user.resetToken}/edit?email=${mailAddr}`
+    const text = await ejs.renderFile(`${templateDir}/password_reset.text.ejs`, { url: url })
+    const html = await ejs.renderFile(`${templateDir}/password_reset.html.ejs`, { url: url })
+    return {
+        from: 'user@realdomain.com',
+        to: user.email,
+        subject: 'Password reset',
+        text: text,
+        html: html,
+    }
+}
+
 async function deliverNow(mail) {
     // メールを送信する
     const info = await transporter.sendMail(mail)
@@ -29,5 +46,6 @@ async function deliverNow(mail) {
 
 module.exports = {
     accountActivation,
+    passwordReset,
     deliverNow,
 }
