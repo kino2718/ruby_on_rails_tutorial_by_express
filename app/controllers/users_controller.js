@@ -86,9 +86,8 @@ async function update(req, res) {
         req.flash('success', 'Profile updated')
 
         // ユーザ画面にredirectする
-        let baseUrl = req.baseUrl
-        if (baseUrl.at(-1) !== '/') baseUrl += '/'
-        res.redirect(`${baseUrl}${user.id}`)
+        let baseUrl = applicationHelper.getBaseUrl(req)
+        res.redirect(`${baseUrl}/${user.id}`)
     } else {
         res.status(422).render('users/edit', { title: 'Edit user', user: user })
     }

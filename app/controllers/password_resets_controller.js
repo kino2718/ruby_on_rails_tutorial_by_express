@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const applicationHelper = require('../helpers/application_helper')
 const csrfHelper = require('../helpers/csrf_helper')
+const sessionsHelper = require('../helpers/sessions_helper')
 const User = require('../models/user')
 
 router.get('/new', async (req, res) => {
@@ -14,6 +15,10 @@ router.post('/', csrfHelper.verifyCsrfToken, async (req, res) => {
 
 router.get('/:resetToken/edit', async (req, res) => {
     await edit(req, res)
+})
+
+router.post('/:resetToken', async (req, res, next) => {
+    await update(req, res, next)
 })
 
 async function newPasswordResets(req, res) {
@@ -41,10 +46,52 @@ async function edit(req, res) {
     const email = req.query.email
     const user = await getUser(email)
     if (validUser(user, token)) {
-        res.render(`password_resets/edit`, { user, resetToken: token })
+        if (checkExpiration(user)) {
+            res.render('password_resets/edit', { user, resetToken: token })
+        } else {
+            // 有効期限切れ
+            expired(req, res)
+        }
     }
     else {
         res.redirect('/')
+    }
+}
+
+async function update(req, res, next) {
+    const token = req.params.resetToken
+    const email = req.body.email
+    const user = await getUser(email)
+
+    if (!validUser(user, token)) {
+        res.redirect('/')
+        return
+    }
+
+    const params = filterSafeParams(req.body.user)
+    console.log('******** params: ', params, '\ntoken: ', token, '\nemail: ', email)
+
+    if (!params.password) {
+        user.addError('password', "can't be empty")
+        res.status(422).render('password_resets/edit', { user, resetToken: token })
+        return
+    }
+
+    if (await user.update(params)) {
+        // session idをリセット
+        req.session.regenerate(async err => {
+            if (err) {
+                next(err)
+                return
+            }
+
+            sessionsHelper.logIn(req.session, user)
+            req.flash('success', 'Password has been reset.')
+            const url = `/users/${user.id}`
+            res.redirect(url)
+        })
+    } else {
+        res.status(422).render('password_resets/edit', { user, resetToken: token })
     }
 }
 
@@ -55,6 +102,23 @@ async function getUser(email) {
 
 function validUser(user, token) {
     return user && user.activated && user.isAuthenticated('reset', token)
+}
+
+function checkExpiration(user) {
+    return !user.isPasswordResetExpired()
+}
+
+function expired(req, res) {
+    req.flash('danger', 'Password reset has expired.')
+    const baseUrl = applicationHelper.getBaseUrl(req)
+    res.redirect(`${baseUrl}/new`)
+}
+
+function filterSafeParams(params) {
+    const filtered = {}
+    filtered.password = params.password
+    filtered.passwordConfirmation = params.passwordConfirmation
+    return filtered
 }
 
 module.exports = {

@@ -30,8 +30,15 @@ function getFullUrl(req) {
     return url
 }
 
+function getBaseUrl(req) {
+    let baseUrl = req.baseUrl
+    if (baseUrl.at(-1) === '/') baseUrl = baseUrl.slice(0, -1)
+    return baseUrl
+}
+
 module.exports = {
     getDebugOutput,
     getDebugOutputParams,
     getFullUrl,
+    getBaseUrl,
 }
