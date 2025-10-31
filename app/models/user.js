@@ -374,16 +374,11 @@ class User extends RecordBase {
     }
 
     isPasswordResetExpired() {
-        console.log('******** this.resetSentAt: ', this.resetSentAt)
         // this.resetSentAt が Date または string のどちらでもOKにする
         const t = this.resetSentAt
         const resetSentAt = t instanceof Date ? t : new Date(t.endsWith('Z') ? t : t + 'Z')
-        console.log('******** resetSentAt(Date type): ', resetSentAt)
-
         // 現在時刻との差（ミリ秒）
         const diffMs = Date.now() - resetSentAt.getTime()
-        console.log('******** diffMs: ', diffMs)
-
         // 2時間（7200000ミリ秒）以上前か？
         const isOver2Hours = 2 * 60 * 60 * 1000 < diffMs
         return isOver2Hours

@@ -47,7 +47,7 @@ async function edit(req, res) {
     const user = await getUser(email)
     if (validUser(user, token)) {
         if (checkExpiration(user)) {
-            res.render('password_resets/edit', { user, resetToken: token })
+            res.render('password_resets/edit', { title: 'Reset password', user: user, resetToken: token })
         } else {
             // 有効期限切れ
             expired(req, res)
@@ -69,11 +69,10 @@ async function update(req, res, next) {
     }
 
     const params = filterSafeParams(req.body.user)
-    console.log('******** params: ', params, '\ntoken: ', token, '\nemail: ', email)
 
     if (!params.password) {
         user.addError('password', "can't be empty")
-        res.status(422).render('password_resets/edit', { user, resetToken: token })
+        res.status(422).render('password_resets/edit', { title: 'Reset password', user: user, resetToken: token })
         return
     }
 
@@ -91,11 +90,12 @@ async function update(req, res, next) {
             res.redirect(url)
         })
     } else {
-        res.status(422).render('password_resets/edit', { user, resetToken: token })
+        res.status(422).render('password_resets/edit', { title: 'Reset password', user: user, resetToken: token })
     }
 }
 
 async function getUser(email) {
+    if (!email) return null
     const users = await User.findBy({ email: email })
     return users?.at(0)
 }
