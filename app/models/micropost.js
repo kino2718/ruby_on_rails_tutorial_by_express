@@ -1,0 +1,163 @@
+const RecordBase = require('./record_base')
+const knexUtils = require('../db/knex_utils')
+const knex = knexUtils.knex
+
+class Micropost extends RecordBase {
+    id // 自動で割り振られる。user.id = 3 等の id の手動での変更は save 時にエラーになる。変更しないこと
+    content
+    userId // 外部キー。users tableのid
+    createdAt // 自動で割り振られる
+    updatedAt // 自動で割り振られる
+
+    constructor(params = {}) {
+        super()
+        this.content = params.content
+        this.userId = params.userId
+    }
+
+    valid() {
+        const props = []
+        const messages = []
+        let v = true
+
+        if (!Micropost.#presence(this.userId)) {
+            v = false
+            props.push('userId')
+            messages.push('user id can\'t be blank')
+        }
+
+        if (!Micropost.#presence(this.content)) {
+            v = false
+            props.push('userId')
+            messages.push('content can\'t be blank')
+        }
+
+        if (!Micropost.#validLength(this.content, { maximum: 140 })) {
+            v = false
+            props.push('content')
+            messages.push('content is too long')
+        }
+
+        if (v) {
+            this.errors = undefined
+        }
+        else {
+            this.errors = {}
+            this.errors.fullMessages = messages
+            this.errors.props = props
+        }
+        return v
+    }
+
+    async save() {
+        if (this.newRecord) {
+            // insert
+            if (!await this.valid()) return false
+            return this.#insert()
+        } else if (this.persisted) {
+            // update
+            if (!await this.valid(true)) return false
+            return this.#update()
+        } else {
+            // 破棄済み。何もしない
+            return false
+        }
+    }
+
+    async #insert() {
+        try {
+            const params = this.#paramsToDB()
+            const [res] = await knex('microposts').insert(params).returning('id')
+            await this.#reload(res.id)
+            this.setSaved()
+            return true
+        } catch (e) {
+            console.error(e)
+            return false
+        }
+    }
+
+    async #update() {
+        try {
+            const params = this.#paramsToDB()
+            const [res] = await knex('microposts')
+                .where('id', this.id)
+                .update({ ...params, updated_at: knex.fn.now() }) // updated_at はデータベース側で更新
+                .returning('id')
+            await this.#reload(res.id)
+            this.setSaved()
+            return true
+        } catch (e) {
+            console.error(e)
+            return false
+        }
+    }
+
+    #paramsToDB() {
+        const toDB = {
+            content: this.content, user_id: this.userId
+        }
+        return toDB
+    }
+
+    async #reload(id) {
+        try {
+            const m = await Micropost.find(id)
+            if (!m) return false
+            Object.assign(this, m)
+            return true
+        } catch (e) {
+            console.error(e)
+            return false
+        }
+    }
+
+    // static methods
+    static async find(id) {
+        try {
+            const obj = await knex('microposts').select('*').where('id', id).first()
+            return Micropost.#dbToUserObject(obj)
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
+    static #dbToUserObject(obj) {
+        if (obj) {
+            const m = new Micropost()
+            m.id = obj.id
+            m.content = obj.content
+            m.userId = obj.user_id
+            m.createdAt = obj.created_at
+            m.updatedAt = obj.updated_at
+            m.setSaved()
+            return m
+        } else {
+            return null
+        }
+    }
+
+    static #presence(x) {
+        if (typeof x === 'number') {
+            return x !== 0
+        } else if (typeof x === 'string') {
+            return !!x.trim()
+        }
+        return !!x
+    }
+
+    static #validLength(str, conds) {
+        if (conds.maximum) {
+            if (!str) return true
+            return str.length <= conds.maximum
+        }
+        if (conds.minimum) {
+            if (!str) return false
+            return conds.minimum <= str.length
+        }
+        return true
+    }
+}
+
+module.exports = Micropost
