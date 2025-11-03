@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs')
 const RecordBase = require('./record_base')
 const uid = require('uid-safe')
 const userMailer = require('../mailers/user_mailer')
+const Micropost = require('./micropost')
 
 class User extends RecordBase {
     id // 自動で割り振られる。user.id = 3 等の id の手動での変更は save 時にエラーになる。変更しないこと
@@ -37,6 +38,21 @@ class User extends RecordBase {
         this.activated = params.activated
         this.activatedAt = params.activatedAt
         this.resetSentAt = params.resetSentAt
+
+        // micropostとの関連付け
+        const self = this
+        const micropostsFunc = async function () {
+            return await Micropost.findBy({ userId: self.id })
+        }
+        micropostsFunc.build = function (params = {}) {
+            params.userId = self.id
+            return new Micropost(params)
+        }
+        micropostsFunc.create = async function (params = {}) {
+            params.userId = self.id
+            return await Micropost.create(params)
+        }
+        this.microposts = micropostsFunc
     }
 
     // password関連のpropertyのgetter, setter methods

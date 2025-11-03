@@ -113,12 +113,46 @@ class Micropost extends RecordBase {
     }
 
     // static methods
+    static async create(params = {}) {
+        const user = new Micropost(params)
+        if (await user.save()) {
+            return user
+        } else {
+            return null
+        }
+    }
+
     static async find(id) {
         try {
             const obj = await knex('microposts').select('*').where('id', id).first()
             return Micropost.#dbToUserObject(obj)
         } catch (e) {
             console.error(e)
+            return null
+        }
+    }
+
+    static async findBy(params = {}) {
+        const params2 = Micropost.#userToDbParams(params)
+        try {
+            const li = await knex('microposts').select('*').where(params2)
+            return li.map(o => Micropost.#dbToUserObject(o))
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
+    static #userToDbParams(user) {
+        if (user) {
+            const db = {}
+            Object.assign(db, user)
+            if (db.userId) {
+                db.user_id = db.userId
+                delete db.userId
+            }
+            return db
+        } else {
             return null
         }
     }

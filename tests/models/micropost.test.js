@@ -1,5 +1,4 @@
 const User = require('../../app/models/user')
-const Micropost = require('../../app/models/micropost')
 const knexUtils = require('../../app/db/knex_utils')
 const knex = knexUtils.knex
 
@@ -21,12 +20,7 @@ describe('micropost test', () => {
             })
         await user.save()
 
-        micropost = new Micropost(
-            {
-                content: "Lorem ipsum",
-                userId: user.id,
-            })
-        await micropost.save()
+        micropost = user.microposts.build({ content: 'Lorem ipsum' })
     })
 
     test('should be valid', () => {
