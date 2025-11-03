@@ -1,10 +1,13 @@
 const User = require('../../app/models/user')
+const Micropost = require('../../app/models/micropost')
 const knexUtils = require('../../app/db/knex_utils')
 const knex = knexUtils.knex
+const testHelper = require('../test_helper')
 
 describe('micropost test', () => {
     let user
     let micropost
+    let microposts
 
     beforeAll(async () => {
         await knex('users').del()
@@ -21,6 +24,9 @@ describe('micropost test', () => {
         await user.save()
 
         micropost = user.microposts.build({ content: 'Lorem ipsum' })
+
+        microposts = await testHelper.setupMicroposts(user)
+        console.log('******** microposts: ', microposts)
     })
 
     test('should be valid', () => {
@@ -46,6 +52,12 @@ describe('micropost test', () => {
         micropost.content = 'a'.repeat(141)
         expect(micropost.valid()).toBe(false)
         micropost.content = content
+    })
+
+    test('order should be most recent first', async () => {
+        const mostRecent = microposts.mostRecent
+        const first = await Micropost.first()
+        expect(first.id).toBe(mostRecent.id)
     })
 
     afterAll(async () => {

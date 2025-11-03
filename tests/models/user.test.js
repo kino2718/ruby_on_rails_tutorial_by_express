@@ -1,4 +1,7 @@
 const User = require('../../app/models/user')
+const Micropost = require('../../app/models/micropost')
+const knexUtils = require('../../app/db/knex_utils')
+const knex = knexUtils.knex
 
 describe('user model test', () => {
     let user
@@ -84,12 +87,18 @@ describe('user model test', () => {
         expect(await user.valid()).toBe(true)
     })
 
-    test('"user.isAuthenticated should return false for a user with nil digest', () => {
+    test('user.isAuthenticated should return false for a user with nil digest', () => {
         expect(user.isAuthenticated('remember', '')).toBe(false)
     })
 
-    const knexUtils = require('../../app/db/knex_utils')
-    const knex = knexUtils.knex
+    test('associated microposts should be destroyed', async () => {
+        await user.save()
+        await user.microposts.create({ content: 'Lorem ipsum' })
+        const beforeCount = await Micropost.count()
+        await user.destroy()
+        const afterCount = await Micropost.count()
+        expect(afterCount).toBe(beforeCount - 1)
+    })
 
     afterAll(async () => {
         await knex.destroy() // コネクションを閉じる

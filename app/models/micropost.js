@@ -64,6 +64,27 @@ class Micropost extends RecordBase {
         }
     }
 
+    async updateAttribute(key, value) {
+        if (this.persisted) {
+            try {
+                if (key === 'userId') key = 'user_id'
+                if (key === 'createdAt') key = 'created_at'
+                const params = { [key]: value }
+                const [res] = await knex('microposts')
+                    .where('id', this.id)
+                    .update({ ...params, updated_at: knex.fn.now() }) // updated_at はデータベース側で更新
+                    .returning('id')
+                await this.#reload(res.id)
+                this.setSaved()
+                return true
+            } catch (e) {
+                console.error(e)
+                return false
+            }
+        }
+        return false
+    }
+
     async #insert() {
         try {
             const params = this.#paramsToDB()
@@ -125,25 +146,51 @@ class Micropost extends RecordBase {
     static async find(id) {
         try {
             const obj = await knex('microposts').select('*').where('id', id).first()
-            return Micropost.#dbToUserObject(obj)
+            return Micropost.#dbToMicropostObject(obj)
         } catch (e) {
             console.error(e)
             return null
         }
+    }
+
+    static defaultScope = {
+        order: {
+            column: 'created_at',
+            direction: 'desc',
+        },
     }
 
     static async findBy(params = {}) {
-        const params2 = Micropost.#userToDbParams(params)
+        const params2 = Micropost.#micropostToDbParams(params)
         try {
             const li = await knex('microposts').select('*').where(params2)
-            return li.map(o => Micropost.#dbToUserObject(o))
+                .orderBy(Micropost.defaultScope.order.column, Micropost.defaultScope.order.direction)
+            return li.map(o => Micropost.#dbToMicropostObject(o))
         } catch (e) {
             console.error(e)
             return null
         }
     }
 
-    static #userToDbParams(user) {
+    static async first() {
+        try {
+            const obj = await knex('microposts').select('*')
+                .orderBy(Micropost.defaultScope.order.column, Micropost.defaultScope.order.direction)
+                .limit(1).first()
+            return Micropost.#dbToMicropostObject(obj)
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
+    static async count() {
+        const { count } = await knex('microposts').count('* as count').first()
+        // 文字列の可能性があるので Number に変換
+        return Number(count)
+    }
+
+    static #micropostToDbParams(user) {
         if (user) {
             const db = {}
             Object.assign(db, user)
@@ -157,7 +204,7 @@ class Micropost extends RecordBase {
         }
     }
 
-    static #dbToUserObject(obj) {
+    static #dbToMicropostObject(obj) {
         if (obj) {
             const m = new Micropost()
             m.id = obj.id

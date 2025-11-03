@@ -112,6 +112,30 @@ async function setupUsers() {
     return users
 }
 
+async function setupMicroposts(user) {
+    await knex('microposts').del()
+    const microposts = {}
+    let m
+
+    m = await user.microposts.create({ content: 'I just ate an orange!' })
+    await m.updateAttribute('createdAt', knex.raw("datetime('now', '-10 minutes')")) // sqlite3用
+    microposts.orange = m
+
+    m = await user.microposts.create({ content: 'Check out the @tauday site by @mhartl: https://tauday.com' })
+    await m.updateAttribute('createdAt', knex.raw("datetime('now', '-3 years')"))
+    microposts.tauManifesto = m
+
+    m = await user.microposts.create({ content: 'Sad cats are sad: https://youtu.be/PKffm2uI4dk' })
+    await m.updateAttribute('createdAt', knex.raw("datetime('now', '-2 hours')"))
+    microposts.catVideo = m
+
+    m = await user.microposts.create({ content: 'Writing a short test' })
+    await m.updateAttribute('createdAt', knex.fn.now())
+    microposts.mostRecent = m
+
+    return microposts
+}
+
 async function getCsrfToken(agent) {
     const res = await agent.get('/test/res/locals')
     const locals = res.body
@@ -124,5 +148,6 @@ module.exports = {
     isLoggedIn,
     logInAs,
     setupUsers,
+    setupMicroposts,
     getCsrfToken,
 }
