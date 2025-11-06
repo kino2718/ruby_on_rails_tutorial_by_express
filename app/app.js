@@ -89,6 +89,7 @@ app.locals.gravatarFor = templatesHelper.gravatarFor
 app.locals.makeFormLabel = templatesHelper.makeFormLabel
 app.locals.makeFormInput = templatesHelper.makeFormInput
 app.locals.paginate = templatesHelper.paginate
+app.locals.timeAgoInWords = templatesHelper.timeAgoInWords
 
 // use express.Router
 app.use('/', staticPagesController.router)

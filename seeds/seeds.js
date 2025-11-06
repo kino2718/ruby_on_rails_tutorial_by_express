@@ -34,4 +34,13 @@ exports.seed = async function (knex) {
       activatedAt: knex.fn.now()
     })
   }
+
+  // idの順で6人にmicropostsを生成する
+  const users = await User.take(6)
+  for (let i = 0; i < 50; ++i) {
+    const content = faker.lorem.sentence(5)
+    for (const user of users) {
+      await user.microposts.create({ content: content })
+    }
+  }
 }

@@ -1,5 +1,6 @@
 const crypto = require('crypto')
 const ejs = require('ejs')
+const { format } = require('timeago.js')
 
 function fullTitle(pageTitle = '') {
     const baseTitle = "Ruby on Rails Tutorial Sample App"
@@ -105,10 +106,30 @@ function paginate(pagination, baseUrl) {
     return html
 }
 
+function timeAgoInWords(dateOrString) {
+    if (!dateOrString) return ''
+
+    // knex + PostgreSQL なら Date オブジェクト、SQLite だと文字列のこともあるので両方対応
+    // UTC時刻なので文字列の場合は末尾に 'Z' を追加する
+    let date = dateOrString instanceof Date ?
+        dateOrString :
+        new Date(dateOrString.endsWith('Z') ?
+            dateOrString :
+            dateOrString + 'Z')
+
+    if (Number.isNaN(date.getTime())) {
+        return ''
+    }
+
+    // "3 minutes ago", "in 2 hours" など英語
+    return format(date)
+}
+
 module.exports = {
     fullTitle,
     gravatarFor,
     makeFormLabel,
     makeFormInput,
     paginate,
+    timeAgoInWords,
 }

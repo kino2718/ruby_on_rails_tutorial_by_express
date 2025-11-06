@@ -10,6 +10,23 @@
       </h1>
     </section>
   </aside>
+  <div class="col-md-8">
+    <% if (nMicroposts) { %>
+      <h3>Microposts (<%= nMicroposts %>)</h3>
+      <ol class="microposts">
+        <% for (const i in microposts) { %>
+          <% const micropost = microposts[i] %>
+          <% const muser = micropostUsers[i] %>
+          <%- include('../microposts/_micropost', {
+                micropost: microposts[i],
+                muser: micropostUsers[i]
+              })
+          %>
+        <% } %>
+      </ol>
+    <% } %>
+    <%- paginate(pagination, `/users/${user.id}`) %>
+  </div>
 </div>
 
 <%- include('../layouts/footer') -%>

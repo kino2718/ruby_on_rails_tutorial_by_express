@@ -26,7 +26,6 @@ describe('micropost test', () => {
         micropost = user.microposts.build({ content: 'Lorem ipsum' })
 
         microposts = await testHelper.setupMicroposts(user)
-        console.log('******** microposts: ', microposts)
     })
 
     test('should be valid', () => {

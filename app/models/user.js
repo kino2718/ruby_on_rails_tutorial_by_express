@@ -40,7 +40,7 @@ class User extends RecordBase {
         this.resetSentAt = params.resetSentAt
 
         // micropostとの関連付け
-        const self = this
+        const self = this // thisは何を指すかが変わるのでselfに固定する
         const micropostsFunc = async function () {
             return await Micropost.findBy({ userId: self.id })
         }
@@ -51,6 +51,14 @@ class User extends RecordBase {
         micropostsFunc.create = async function (params = {}) {
             params.userId = self.id
             return await Micropost.create(params)
+        }
+        micropostsFunc.count = async function () {
+            const options = { where: { userId: self.id } }
+            return await Micropost.count(options)
+        }
+        micropostsFunc.paginate = async function (perPage, offset) {
+            const options = { where: { userId: self.id } }
+            return await Micropost.paginate(perPage, offset, options)
         }
         this.microposts = micropostsFunc
     }
@@ -435,6 +443,18 @@ class User extends RecordBase {
         try {
             const obj = await knex('users').select('*').orderBy('id', 'asc').limit(1).first()
             return User.#dbToUserObject(obj)
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
+    static async take(n, options = { order: { column: 'id', direction: 'asc' } }) {
+        try {
+            const li = await knex('users').select('*')
+                .orderBy(options.order.column, options.order.direction)
+                .limit(n)
+            return li.map(o => User.#dbToUserObject(o))
         } catch (e) {
             console.error(e)
             return null

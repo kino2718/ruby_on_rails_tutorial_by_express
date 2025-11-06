@@ -45,9 +45,32 @@ async function show(req, res) {
     const debugOutputParams = applicationHelper.getDebugOutputParams(req)
     if (debugOutputParams) res.locals.debugOutput += `, ${debugOutputParams}`
 
+
     const userId = req.params.userId
     const user = await User.find(userId)
-    res.render('users/show', { title: user.name, user: user })
+    const nMicroposts = await user.microposts.count()
+
+    // pagination
+    const page = parseInt(req.query.page) || 1
+    const perPage = 30
+    const totalCount = nMicroposts
+    const totalPages = Math.ceil(totalCount / perPage)
+    const offset = (page - 1) * perPage
+
+    const microposts = await user.microposts.paginate(perPage, offset)
+    const micropostUsers = []
+    for (const m of microposts) {
+        micropostUsers.push(await m.user())
+    }
+
+    res.render('users/show', {
+        title: user.name,
+        user: user,
+        microposts: microposts,
+        nMicroposts: nMicroposts,
+        micropostUsers: micropostUsers,
+        pagination: { current: page, totalPages: totalPages }
+    })
 }
 
 function newUser(req, res) {

@@ -13,6 +13,14 @@ class Micropost extends RecordBase {
         super()
         this.content = params.content
         this.userId = params.userId
+
+        // userとの関連付け
+        const self = this
+        const User = require('./user') // 循環参照の問題を避けるためここに置く
+        const userFunc = async function () {
+            return await User.find(self.userId)
+        }
+        this.user = userFunc
     }
 
     valid() {
@@ -184,16 +192,38 @@ class Micropost extends RecordBase {
         }
     }
 
-    static async count() {
-        const { count } = await knex('microposts').count('* as count').first()
+    static async count(options = { where: undefined }) {
+        let builder = knex('microposts').count('* as count')
+        if (options.where) {
+            const where = Micropost.#micropostToDbParams(options.where)
+            builder = builder.where(where)
+        }
+        const { count } = await builder.first()
         // 文字列の可能性があるので Number に変換
         return Number(count)
     }
 
-    static #micropostToDbParams(user) {
-        if (user) {
+    static async paginate(perPage, offset, options = { where: undefined }) {
+        try {
+            let builder = knex('microposts').select('*')
+                .orderBy(Micropost.defaultScope.order.column, Micropost.defaultScope.order.direction)
+                .limit(perPage).offset(offset)
+            if (options.where) {
+                const where = Micropost.#micropostToDbParams(options.where)
+                builder = builder.where(where)
+            }
+            const li = await builder
+            return li.map(o => Micropost.#dbToMicropostObject(o))
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
+    static #micropostToDbParams(m) {
+        if (m) {
             const db = {}
-            Object.assign(db, user)
+            Object.assign(db, m)
             if (db.userId) {
                 db.user_id = db.userId
                 delete db.userId

@@ -1,0 +1,8 @@
+<li id="micropost-<%= micropost.id %>">
+  <a href="/users/<%= muser.id %>"><%- gravatarFor(muser, {size: 50}) %></a>
+  <span class="user"><a href="/users/<%= muser.id %>"><%= muser.name %></a></span>
+  <span class="content"><%= micropost.content %></span>
+  <span class="timestamp">
+    Posted <%= timeAgoInWords(micropost.createdAt) %>
+  </span>
+</li>
