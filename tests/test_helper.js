@@ -1,4 +1,5 @@
 const cheerio = require('cheerio')
+const { faker } = require('@faker-js/faker')
 const User = require('../app/models/user')
 const knexUtils = require('../app/db/knex_utils')
 const knex = knexUtils.knex
@@ -132,6 +133,13 @@ async function setupMicroposts(user) {
     m = await user.microposts.create({ content: 'Writing a short test' })
     await m.updateAttribute('createdAt', knex.fn.now())
     microposts.mostRecent = m
+
+    for (let i = 0; i < 30; ++i) {
+        const content = faker.lorem.sentence(5)
+        m = await user.microposts.create({ content: content })
+        await m.updateAttribute('createdAt', knex.raw("datetime('now', '-42 days')"))
+        microposts[`micropost_${i}`] = m
+    }
 
     return microposts
 }
