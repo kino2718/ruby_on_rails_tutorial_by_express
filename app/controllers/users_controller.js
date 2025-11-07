@@ -4,6 +4,7 @@ const User = require('../models/user')
 const applicationHelper = require('../helpers/application_helper')
 const csrfHelper = require('../helpers/csrf_helper')
 const sessionsHelper = require('../helpers/sessions_helper')
+const loggedInUser = sessionsHelper.loggedInUser
 
 router.get('/', loggedInUser, async (req, res) => {
     await index(req, res)
@@ -125,19 +126,6 @@ async function destroy(req, res) {
     }
     let baseUrl = req.baseUrl
     res.redirect(`${baseUrl}`)
-}
-
-async function loggedInUser(req, res, next) {
-    if (! await sessionsHelper.hasLoggedIn(req)) {
-        // urlを保存
-        sessionsHelper.storeLocation(req)
-        // flash の設定
-        req.flash('danger', 'Please log in.')
-        // log in画面にredirect
-        res.redirect('/login')
-    } else {
-        next()
-    }
 }
 
 async function correctUser(req, res, next) {

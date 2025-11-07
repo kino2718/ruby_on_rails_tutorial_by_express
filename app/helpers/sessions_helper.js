@@ -75,6 +75,19 @@ function storeLocation(req) {
     }
 }
 
+async function loggedInUser(req, res, next) {
+    if (! await hasLoggedIn(req)) {
+        // urlを保存
+        storeLocation(req)
+        // flash の設定
+        req.flash('danger', 'Please log in.')
+        // log in画面にredirect
+        res.redirect('/login')
+    } else {
+        next()
+    }
+}
+
 module.exports = {
     logIn,
     remember,
@@ -84,4 +97,5 @@ module.exports = {
     logOut,
     isCurrentUser,
     storeLocation,
+    loggedInUser,
 }
