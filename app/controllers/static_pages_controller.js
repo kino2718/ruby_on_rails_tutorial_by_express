@@ -23,7 +23,7 @@ router.get('/signup', (req, res) => {
 })
 
 function home(req, res) {
-    res.render('static_pages/home')
+    res.render('static_pages/home', { micropost: {} })
 }
 
 function help(req, res) {

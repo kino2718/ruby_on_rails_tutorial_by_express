@@ -1,5 +1,17 @@
 <%- include('../layouts/header') -%>
 
+<% if (hasLoggedIn) { %>
+  <div class="row">
+    <aside class="col-md-4">
+      <section class="user_info">
+        <%- include('../shared/_user_info') %>
+      </section>
+      <section class="micropost_form">
+        <%- include('../shared/_micropost_form') %>
+      </section>
+    </aside>
+  </div>
+<% } else { %>
     <div class="center p-5 mb-4 bg-body-secondary rounded-3">
         <h1>Welcome to the Sample App</h1>
 
@@ -13,5 +25,6 @@
     </div>
 
     <a href="https://rubyonrails.org/"><img alt="Rails logo" width="200px" src="/images/rails.svg" /></a>
+<% } %>
 
 <%- include('../layouts/footer') -%>

@@ -7,7 +7,7 @@
             <form action="/users/<%= user.id %>" accept-charset="UTF-8" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
 
-                <%- include('../shared/_error_messages') -%>
+                <%- include('../shared/_error_messages', { object: user }) -%>
 
                 <%- makeFormLabel(
                     user,

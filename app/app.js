@@ -14,6 +14,7 @@ const session = require('express-session')
 const csrfHelper = require('./helpers/csrf_helper')
 const flash = require('connect-flash')
 const cookieParser = require('cookie-parser')
+const pluralize = require('pluralize')
 
 const app = express()
 
@@ -70,7 +71,8 @@ app.use(async (req, res, next) => {
     // 全ての画面でlog in状態かどうかを知る必要があるのでここで取得・設定する
     res.locals.hasLoggedIn = await sessionsHelper.hasLoggedIn(req)
     const currentUser = await sessionsHelper.currentUser(req)
-    res.locals.currentUserId = currentUser ? currentUser.id : null
+    res.locals.currentUser = currentUser
+    res.locals.currentUserMicropostsCount = currentUser ? await currentUser.microposts.count() : 0
     next()
 })
 
@@ -91,6 +93,7 @@ app.locals.makeFormLabel = templatesHelper.makeFormLabel
 app.locals.makeFormInput = templatesHelper.makeFormInput
 app.locals.paginate = templatesHelper.paginate
 app.locals.timeAgoInWords = templatesHelper.timeAgoInWords
+app.locals.pluralize = pluralize
 
 // use express.Router
 app.use('/', staticPagesController.router)

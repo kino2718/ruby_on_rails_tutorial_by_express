@@ -41,8 +41,8 @@
                 Account
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="/users/<%= currentUserId %>">Profile</a></li>
-                <li><a class="dropdown-item" href="/users/<%= currentUserId %>/edit">Settings</a></li>
+                <li><a class="dropdown-item" href="/users/<%= currentUser.id %>">Profile</a></li>
+                <li><a class="dropdown-item" href="/users/<%= currentUser.id %>/edit">Settings</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <!-- POSTでログアウトするためformを使用 -->

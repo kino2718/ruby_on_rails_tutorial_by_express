@@ -1,0 +1,4 @@
+<a href="/users/<%= currentUser.id %>"><%- gravatarFor(currentUser, {size: 50}) %></a>
+<h1><%= currentUser.name %></h1>
+<span><a href="/users/<%= currentUser.id %>">view my profile</a></span>
+<span><%= pluralize('micropost', currentUserMicropostsCount, true) %></span>

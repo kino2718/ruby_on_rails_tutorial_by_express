@@ -8,7 +8,7 @@
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
                 <input type="hidden" name="email" id="email" value="<%= user.email %>" autocomplete="off" />
 
-                <%- include('../shared/_error_messages') -%>
+                <%- include('../shared/_error_messages', { object: user }) -%>
 
                 <%- makeFormLabel(
                     user,

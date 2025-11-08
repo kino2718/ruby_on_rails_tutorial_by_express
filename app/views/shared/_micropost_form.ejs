@@ -1,0 +1,10 @@
+<form action="/microposts" accept-charset="UTF-8" method="post">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
+
+  <%- include('../shared/_error_messages', { object: micropost }) -%>
+
+  <div class="field">
+    <textarea placeholder="Compose new micropost..." name="micropost[content]" id="micropost_content"></textarea>
+  </div>
+  <input type="submit" name="commit" value="Post" class="btn btn-primary"  />
+</form>
