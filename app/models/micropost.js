@@ -207,7 +207,7 @@ class Micropost extends RecordBase {
         try {
             let builder = knex('microposts').select('*')
                 .orderBy(Micropost.defaultScope.order.column, Micropost.defaultScope.order.direction)
-                .limit(perPage).offset(offset)
+            if (perPage) builder = builder.limit(perPage).offset(offset)
             if (options.where) {
                 const where = Micropost.#micropostToDbParams(options.where)
                 builder = builder.where(where)

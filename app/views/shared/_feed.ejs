@@ -1,0 +1,14 @@
+<% if (microposts.length) { %>
+  <ol class="microposts">
+    <% for (const i in microposts) { %>
+        <% const micropost = microposts[i] %>
+        <% const muser = micropostUsers[i] %>
+        <%- include('../microposts/_micropost', {
+            micropost: microposts[i],
+            muser: micropostUsers[i]
+            })
+        %>
+    <% } %>
+    <%- paginate(pagination, '/') %>
+  </ol>
+<% } %>

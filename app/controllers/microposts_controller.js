@@ -20,7 +20,20 @@ async function create(req, res) {
         req.flash('success', 'Micropost created!')
         res.redirect('/')
     } else {
-        res.status(422).render('static_pages/home', { micropost: micropost })
+        // pagination
+        const page = parseInt(req.query.page) || 1
+        const perPage = 30
+        const offset = (page - 1) * perPage
+        const feedItems = await user.feed(perPage, offset)
+        const totalCount = await user.feedCount()
+        const totalPages = Math.ceil(totalCount / perPage)
+        const feedUsers = []
+        for (const m of feedItems) {
+            feedUsers.push(await m.user())
+        }
+        res.status(422).render('static_pages/home', {
+            micropost: micropost, feedItems: feedItems, feedUsers: feedUsers, pagination: { current: page, totalPages: totalPages }
+        })
     }
 }
 

@@ -408,6 +408,15 @@ class User extends RecordBase {
         return isOver2Hours
     }
 
+    // perPage = undefined: no paginate
+    async feed(perPage, offset) {
+        return await Micropost.paginate(perPage, offset, { where: { userId: this.id } })
+    }
+
+    async feedCount() {
+        return await Micropost.count({ where: { userId: this.id } })
+    }
+
     // static methods
     static async create(params = {}) {
         const user = new User(params)
