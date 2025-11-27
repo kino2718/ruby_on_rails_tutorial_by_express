@@ -9,7 +9,8 @@ router.post('/', verifyCsrfToken, loggedInUser, async (req, res) => {
     await create(req, res)
 })
 
-router.post('/:id/delete', verifyCsrfToken, loggedInUser, async () => {
+router.post('/:id/delete', verifyCsrfToken, loggedInUser, async (req, res) => {
+    await destroy(req, res)
 })
 
 async function create(req, res) {
@@ -34,6 +35,22 @@ async function create(req, res) {
         res.status(422).render('static_pages/home', {
             micropost: micropost, feedItems: feedItems, feedUsers: feedUsers, pagination: { current: page, totalPages: totalPages }
         })
+    }
+}
+
+async function destroy(req, res) {
+    const id = req.params.id
+    const currentUser = await sessionsHelper.currentUser(req)
+    const microposts = await currentUser?.microposts.findBy({ id: id })
+    const micropost = microposts?.at(0)
+    if (!micropost) {
+        res.redirect('/')
+    } else {
+        await micropost.destroy()
+        req.flash('success', 'Micropost deleted')
+        const referer = req.headers.referer
+        if (!referer) res.redirect('/')
+        else res.redirect(referer)
     }
 }
 

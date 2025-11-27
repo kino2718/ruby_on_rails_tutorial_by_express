@@ -4,5 +4,12 @@
   <span class="content"><%= micropost.content %></span>
   <span class="timestamp">
     Posted <%= timeAgoInWords(micropost.createdAt) %>
+    <% if (currentUser?.id === muser?.id) { %>
+      <!-- POSTでdeleteするためformを使用 -->
+      <form action="/microposts/<%= micropost.id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('You sure?');">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
+        <button type="submit" class="btn btn-link p-0 align-baseline text-decoration-none">delete</button>
+      </form>
+    <% } %>
   </span>
 </li>

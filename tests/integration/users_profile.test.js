@@ -30,7 +30,7 @@ describe('users profile test', () => {
         return await agent.get(`/users/${user.id}`)
     }
 
-    test('', async () => {
+    test('profile display', async () => {
         const agent = request.agent(app)
 
         const res = await getUserPath(agent, user)

@@ -60,6 +60,10 @@ class User extends RecordBase {
             const options = { where: { userId: self.id } }
             return await Micropost.paginate(perPage, offset, options)
         }
+        micropostsFunc.findBy = async function (params = {}) {
+            params.userId = self.id
+            return await Micropost.findBy(params)
+        }
         this.microposts = micropostsFunc
     }
 

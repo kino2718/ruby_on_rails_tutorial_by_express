@@ -141,6 +141,18 @@ class Micropost extends RecordBase {
         }
     }
 
+    async destroy() {
+        if (this.persisted) {
+            try {
+                await knex('microposts').where({ id: this.id }).del()
+                this.setDestroyed()
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        return this
+    }
+
     // static methods
     static async create(params = {}) {
         const user = new Micropost(params)
