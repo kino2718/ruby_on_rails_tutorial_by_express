@@ -144,6 +144,28 @@ async function setupMicroposts(user) {
     return microposts
 }
 
+async function postMicropost(agent, content) {
+    const csrfToken = await getCsrfToken(agent)
+    return await agent
+        .post('/microposts')
+        .type('form')
+        .send({
+            _csrf: csrfToken,
+            'micropost[content]': content,
+        })
+}
+
+async function deleteMicropost(agent, micropost) {
+    const csrfToken = await getCsrfToken(agent)
+    return await agent
+        .post(`/microposts/${micropost.id}/delete`)
+        .type('form')
+        .send({
+            _csrf: csrfToken,
+        })
+
+}
+
 async function getCsrfToken(agent) {
     const res = await agent.get('/test/res/locals')
     const locals = res.body
@@ -157,5 +179,7 @@ module.exports = {
     logInAs,
     setupUsers,
     setupMicroposts,
+    postMicropost,
+    deleteMicropost,
     getCsrfToken,
 }
