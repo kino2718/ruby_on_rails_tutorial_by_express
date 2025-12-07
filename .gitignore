@@ -5,3 +5,7 @@ node_modules/
 /db/*.sqlite3-*
 
 .env
+
+# Ignore uploaded files.
+/uploads/*
+!/uploads/.keep

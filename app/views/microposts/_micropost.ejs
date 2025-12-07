@@ -2,6 +2,9 @@
   <a href="/users/<%= muser.id %>"><%- gravatarFor(muser, {size: 50}) %></a>
   <span class="user"><a href="/users/<%= muser.id %>"><%= muser.name %></a></span>
   <span class="content"><%= micropost.content %></span>
+  <% if (micropost.image) { %>
+    <img src="<%= micropost.image.fileName %>" />
+  <% } %>
   <span class="timestamp">
     Posted <%= timeAgoInWords(micropost.createdAt) %>
     <% if (currentUser?.id === muser?.id) { %>

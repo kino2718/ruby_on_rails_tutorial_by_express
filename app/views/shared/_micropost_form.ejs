@@ -1,4 +1,4 @@
-<form action="/microposts" accept-charset="UTF-8" method="post">
+<form action="/microposts" accept-charset="UTF-8" method="post" enctype="multipart/form-data">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
 
   <%- include('../shared/_error_messages', { object: micropost }) -%>
@@ -7,4 +7,7 @@
     <textarea placeholder="Compose new micropost..." name="micropost[content]" id="micropost_content"></textarea>
   </div>
   <input type="submit" name="commit" value="Post" class="btn btn-primary"  />
+  <span class="image">
+    <input type="file" name="micropost[image]" id="micropost_image" />
+  </span>
 </form>

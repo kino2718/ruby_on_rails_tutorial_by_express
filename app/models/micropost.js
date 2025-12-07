@@ -1,6 +1,7 @@
 const RecordBase = require('./record_base')
 const knexUtils = require('../db/knex_utils')
 const knex = knexUtils.knex
+const Image = require('./image')
 
 class Micropost extends RecordBase {
     id // 自動で割り振られる。user.id = 3 等の id の手動での変更は save 時にエラーになる。変更しないこと
@@ -60,11 +61,11 @@ class Micropost extends RecordBase {
     async save() {
         if (this.newRecord) {
             // insert
-            if (!await this.valid()) return false
+            if (!this.valid()) return false
             return this.#insert()
         } else if (this.persisted) {
             // update
-            if (!await this.valid(true)) return false
+            if (!this.valid()) return false
             return this.#update()
         } else {
             // 破棄済み。何もしない
@@ -144,6 +145,13 @@ class Micropost extends RecordBase {
     async destroy() {
         if (this.persisted) {
             try {
+                // まず関連付けされたimageを削除する。databaseでon delete cascadeしているので
+                // 自動的に消えるがimageに所属する画像ファイルも最終的に消したいので
+                // 明示的にimageを削除する。
+                const image = (await Image.findBy({ micropostId: this.id }))?.at(0)
+                if (image) {
+                    await image.destroy()
+                }
                 await knex('microposts').where({ id: this.id }).del()
                 this.setDestroyed()
             } catch (e) {
@@ -155,18 +163,17 @@ class Micropost extends RecordBase {
 
     // static methods
     static async create(params = {}) {
-        const user = new Micropost(params)
-        if (await user.save()) {
-            return user
-        } else {
-            return null
-        }
+        const o = new Micropost(params)
+        if (await o.save()) return o
+        else return null
     }
 
     static async find(id) {
         try {
             const obj = await knex('microposts').select('*').where('id', id).first()
-            return Micropost.#dbToMicropostObject(obj)
+            const m = Micropost.#dbToMicropostObject(obj)
+            m.image = (await Image.findBy({ micropostId: m.id }))?.at(0)
+            return m
         } catch (e) {
             console.error(e)
             return null
@@ -185,7 +192,13 @@ class Micropost extends RecordBase {
         try {
             const li = await knex('microposts').select('*').where(params2)
                 .orderBy(Micropost.defaultScope.order.column, Micropost.defaultScope.order.direction)
-            return li.map(o => Micropost.#dbToMicropostObject(o))
+            const ms = []
+            for (const o of li) {
+                const m = Micropost.#dbToMicropostObject(o)
+                m.image = (await Image.findBy({ micropostId: m.id }))?.at(0)
+                ms.push(m)
+            }
+            return ms
         } catch (e) {
             console.error(e)
             return null
@@ -197,7 +210,9 @@ class Micropost extends RecordBase {
             const obj = await knex('microposts').select('*')
                 .orderBy(Micropost.defaultScope.order.column, Micropost.defaultScope.order.direction)
                 .limit(1).first()
-            return Micropost.#dbToMicropostObject(obj)
+            const m = Micropost.#dbToMicropostObject(obj)
+            m.image = (await Image.findBy({ micropostId: m.id }))?.at(0)
+            return m
         } catch (e) {
             console.error(e)
             return null
@@ -225,7 +240,13 @@ class Micropost extends RecordBase {
                 builder = builder.where(where)
             }
             const li = await builder
-            return li.map(o => Micropost.#dbToMicropostObject(o))
+            const ms = []
+            for (const o of li) {
+                const m = Micropost.#dbToMicropostObject(o)
+                m.image = (await Image.findBy({ micropostId: m.id }))?.at(0)
+                ms.push(m)
+            }
+            return ms
         } catch (e) {
             console.error(e)
             return null

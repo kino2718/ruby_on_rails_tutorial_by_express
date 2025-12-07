@@ -2,10 +2,12 @@ const express = require('express')
 const router = express.Router()
 const csrfHelper = require('../helpers/csrf_helper')
 const sessionsHelper = require('../helpers/sessions_helper')
+const uploadHelper = require('../helpers/upload_helper')
 const verifyCsrfToken = csrfHelper.verifyCsrfToken
 const loggedInUser = sessionsHelper.loggedInUser
+const Image = require('../models/image')
 
-router.post('/', verifyCsrfToken, loggedInUser, async (req, res) => {
+router.post('/', uploadHelper.single('micropost[image]'), verifyCsrfToken, loggedInUser, async (req, res) => {
     await create(req, res)
 })
 
@@ -18,6 +20,12 @@ async function create(req, res) {
     const user = await sessionsHelper.currentUser(req)
     const micropost = user.microposts.build(params)
     if (await micropost.save()) {
+        // 画像がある場合は画像情報を保存
+        if (req.file) {
+            const file = req.file
+            const params = { micropostId: micropost.id, fileName: file.path, mimeType: file.mimetype, size: file.size }
+            await Image.create(params)
+        }
         req.flash('success', 'Micropost created!')
         res.redirect('/')
     } else {

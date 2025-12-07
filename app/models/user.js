@@ -356,6 +356,12 @@ class User extends RecordBase {
     async destroy() {
         if (this.persisted) {
             try {
+                // まずmicropostsを削除する。databaseでon delete cascadeしているので
+                // 自動的に消えるがmicropostに所属する画像ファイルも最終的に消したいので
+                // 明示的にmicropostsを削除する。
+                for (const m of await this.microposts()) {
+                    await m.destroy()
+                }
                 await knex('users').where({ id: this.id }).del()
                 this.setDestroyed()
             } catch (e) {

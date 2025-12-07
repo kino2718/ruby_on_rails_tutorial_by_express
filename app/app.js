@@ -25,6 +25,8 @@ app.set('view engine', 'ejs')
 
 // set the root directory of static assets
 app.use(express.static(path.join(__dirname, 'assets')))
+// set uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
 
 // cookie の設定
 const cookieSecret = process.env.COOKIE_SECRET
