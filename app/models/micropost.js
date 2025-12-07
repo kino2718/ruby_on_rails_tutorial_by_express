@@ -47,6 +47,20 @@ class Micropost extends RecordBase {
             messages.push('content is too long')
         }
 
+        if (this.image) {
+            if (!['image/jpeg', 'image/gif', 'image/png'].includes(this.image.mimeType)) {
+                v = false
+                props.push('image')
+                messages.push('must be a valid image format')
+            }
+
+            if (5 * 1024 * 1024 < this.image.size) {
+                v = false
+                props.push('image')
+                messages.push('should be less than 5MB')
+            }
+        }
+
         if (v) {
             this.errors = undefined
         }

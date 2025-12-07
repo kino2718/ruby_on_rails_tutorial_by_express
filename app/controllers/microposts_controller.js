@@ -19,12 +19,18 @@ async function create(req, res) {
     const params = filterSafeParams(req.body.micropost)
     const user = await sessionsHelper.currentUser(req)
     const micropost = user.microposts.build(params)
+    // 画像がある場合は画像情報を保存
+    let imageParams
+    if (req.file) {
+        const file = req.file
+        imageParams = { fileName: file.path, mimeType: file.mimetype, size: file.size }
+        micropost.image = imageParams
+    }
     if (await micropost.save()) {
         // 画像がある場合は画像情報を保存
         if (req.file) {
-            const file = req.file
-            const params = { micropostId: micropost.id, fileName: file.path, mimeType: file.mimetype, size: file.size }
-            await Image.create(params)
+            imageParams.micropostId = micropost.id // micropost id を追加。
+            await Image.create(imageParams)
         }
         req.flash('success', 'Micropost created!')
         res.redirect('/')
