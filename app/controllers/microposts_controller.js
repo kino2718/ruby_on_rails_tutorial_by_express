@@ -6,6 +6,9 @@ const uploadHelper = require('../helpers/upload_helper')
 const verifyCsrfToken = csrfHelper.verifyCsrfToken
 const loggedInUser = sessionsHelper.loggedInUser
 const Image = require('../models/image')
+const sharp = require('sharp')
+const path = require('path')
+const fs = require('fs')
 
 router.post('/', uploadHelper.single('micropost[image]'), verifyCsrfToken, loggedInUser, async (req, res) => {
     await create(req, res)
@@ -21,16 +24,31 @@ async function create(req, res) {
     const micropost = user.microposts.build(params)
     // 画像がある場合は画像情報を保存
     let imageParams
+    let resizedBuffer
     if (req.file) {
-        const file = req.file
-        imageParams = { fileName: file.path, mimeType: file.mimetype, size: file.size }
+        resizedBuffer = await sharp(req.file.buffer)
+            .resize(500, 500, {
+                fit: 'inside',           // 指定された枠内に収まるように縮小
+                withoutEnlargement: true // 小さい画像は拡大しない
+            })
+            .toBuffer()
+        // micropost save でのvalidチェックのため画像情報を渡す
+        imageParams = { mimeType: req.file.mimetype, size: req.file.size }
         micropost.image = imageParams
     }
     if (await micropost.save()) {
         // 画像がある場合は画像情報を保存
         if (req.file) {
+            // 画像ファイル名を作成
+            const fileName = Date.now() + '-' + Math.round(Math.random() * 1e9) + path.extname(req.file.originalname)
+            const filePath = path.join('/uploads', fileName)
+            // 画像情報をデータベースに保存
             imageParams.micropostId = micropost.id // micropost id を追加。
+            imageParams.fileName = filePath        // ファイル名を追加
             await Image.create(imageParams)
+            // 画像データをファイルに保存
+            const outputPath = path.join(__dirname, '../../uploads', fileName)
+            await fs.promises.writeFile(outputPath, resizedBuffer)
         }
         req.flash('success', 'Micropost created!')
         res.redirect('/')
