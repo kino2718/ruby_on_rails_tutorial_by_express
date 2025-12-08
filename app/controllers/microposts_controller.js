@@ -81,7 +81,7 @@ async function destroy(req, res) {
         await micropost.destroy()
         req.flash('success', 'Micropost deleted')
         const referer = req.headers.referer
-        if (!referer) res.redirect('/')
+        if (!referer || referer.includes('/micropost')) res.redirect('/')
         else res.redirect(referer)
     }
 }
