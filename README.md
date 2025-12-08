@@ -23,6 +23,10 @@ JavaScript と Express で実装した Web アプリです。
 -   @faker-js/faker: サンプルユーザの名前作成用。
 -   nodemailer: メール送信用。
 -   uid-safe: token作成用。
+-   pluralize: 英単語の単数形・複数形の書き分けに使用。
+-   timeago: 時刻情報を「* minutes ago」の様に表示するのに使用。
+-   multer: form からの画像データのアップロード対応に使用。
+-   sharp: 画像データの縮小に使用。
 
 ## ローカルでの使い方
 
