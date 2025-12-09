@@ -1,23 +1,18 @@
 const RecordBase = require('./record_base')
 const knexUtils = require('../db/knex_utils')
 const knex = knexUtils.knex
-const fs = require('fs')
-const path = require('path')
 
-class Image extends RecordBase {
-    id // 自動で割り振られる
-    micropostId
-    fileName
-    mimeType
-    size
+class Relationship extends RecordBase {
+    id
+    followerId
+    followedId
     createdAt
+    updatedAt
 
     constructor(params = {}) {
         super()
-        this.micropostId = params.micropostId
-        this.fileName = params.fileName
-        this.mimeType = params.mimeType
-        this.size = params.size
+        this.followerId = params.followerId
+        this.followedId = params.followedId
     }
 
     valid() {
@@ -25,26 +20,25 @@ class Image extends RecordBase {
         const messages = []
         let v = true
 
-        if (!Image.#presence(this.micropostId)) {
+        if (!Relationship.#presence(this.followerId)) {
             v = false
-            props.push('micropostId')
-            messages.push("micropost id can't be blank")
+            props.push('followerId')
+            messages.push("follower id can't be blank")
         }
 
-        if (!Image.#presence(this.fileName)) {
+        if (!Relationship.#presence(this.followedId)) {
             v = false
-            props.push('fileName')
-            messages.push("file name can't be blank")
+            props.push('followedId')
+            messages.push("followed id can't be blank")
         }
 
         if (v) {
             this.errors = undefined
         }
         else {
-            this.errors = {
-                fullMessages: messages,
-                props: props
-            }
+            this.errors = {}
+            this.errors.fullMessages = messages
+            this.errors.props = props
         }
         return v
     }
@@ -58,8 +52,7 @@ class Image extends RecordBase {
             // update
             if (!this.valid()) return false
             return this.#update()
-        }
-        else {
+        } else {
             // 破棄済み。何もしない
             return false
         }
@@ -68,15 +61,14 @@ class Image extends RecordBase {
     async updateAttribute(key, value) {
         if (this.persisted) {
             try {
-                key = Image.#propNameToDbColumnName(key)
+                key = Relationship.#propNameToDbColumnName(key)
                 const param = { [key]: value }
-                const [res] = await knex('images')
+                const [res] = await knex('relationships')
                     .where('id', this.id)
                     .update(param)
                     .returning('id')
                 await this.#reload(res.id)
                 this.setSaved()
-                return true
             } catch (e) {
                 console.error(e)
                 return false
@@ -89,7 +81,8 @@ class Image extends RecordBase {
         try {
             const params = this.#paramsToDB()
             delete params.created_at // 作成時刻はdbが作成
-            const [res] = await knex('images').insert(params).returning('id')
+            delete params.updated_at // 更新時刻はdbが作成
+            const [res] = await knex('relationships').insert(params).returning('id')
             await this.#reload(res.id)
             this.setSaved()
             return true
@@ -102,9 +95,10 @@ class Image extends RecordBase {
     async #update() {
         try {
             const params = this.#paramsToDB()
-            const [res] = await knex('images')
+            delete params.updated_at // 更新時刻はdbが作成
+            const [res] = await knex('relationships')
                 .where('id', this.id)
-                .update(params)
+                .update({ ...params, updated_at: knex.fn.now() })
                 .returning('id')
             await this.#reload(res.id)
             this.setSaved()
@@ -116,12 +110,12 @@ class Image extends RecordBase {
     }
 
     #paramsToDB() {
-        return Image.#imageToDbParams(this)
+        return Relationship.#relationshipToDbParams(this)
     }
 
     async #reload(id) {
         try {
-            const o = await Image.find(id)
+            const o = await Relationship.find(id)
             if (!o) return false
             Object.assign(this, o)
         } catch (e) {
@@ -133,12 +127,7 @@ class Image extends RecordBase {
     async destroy() {
         if (this.persisted) {
             try {
-                // まずデータベースのレコードを削除し保存されている画像ファイルを削除する。
-                await knex('images').where({ id: this.id }).del()
-
-                const filePath = path.join(__dirname, '../../', this.fileName)
-                await fs.promises.unlink(filePath)
-
+                await knex('relationships').where({ id: this.id }).del()
                 this.setDestroyed()
             } catch (e) {
                 console.error(e)
@@ -148,16 +137,17 @@ class Image extends RecordBase {
     }
 
     // static methods
+
     static async create(params = {}) {
-        const o = new Image(params)
+        const o = new Relationship(params)
         if (await o.save()) return o
         else return null
     }
 
     static async find(id) {
         try {
-            const o = await knex('images').select('*').where('id', id).first()
-            return Image.#dbToImage(o)
+            const o = await knex('relationships').select('*').where('id', id).first()
+            return Relationship.#dbToRelationship(o)
         } catch (e) {
             console.error(e)
             return null
@@ -165,42 +155,31 @@ class Image extends RecordBase {
     }
 
     static async findBy(params = {}) {
-        const params2 = Image.#imageToDbParams(params)
+        const params2 = Relationship.#relationshipToDbParams(params)
         try {
-            const arrays = await knex('images').select('*').where(params2)
-            return arrays.map(r => Image.#dbToImage(r))
-        }
-        catch (e) {
+            const array = await knex('relationships').select('*').where(params2)
+            return array.map(o => Relationship.#dbToRelationship(o))
+        } catch (e) {
             console.error(e)
             return null
         }
     }
 
-    static #imageToDbParams(o) {
-        if (o) {
-            const toDB = {}
-            for (const [key, value] of Object.entries(o)) {
-                const columnName = Image.#propNameToDbColumnName(key)
-                if (columnName) toDB[columnName] = value
-            }
-            return toDB
-        } else {
+    static async all() {
+        try {
+            const li = await knex('relationships').select('*').orderBy('id', 'asc')
+            return li.map(o => Relationship.#dbToRelationship(o))
+        } catch (e) {
+            console.error(e)
             return null
         }
     }
 
-    static #dbToImage(o) {
-        if (o) {
-            const image = new Image()
-            for (const [key, value] of Object.entries(o)) {
-                const propName = Image.#dbColumnNameToPropName(key)
-                if (propName) image[propName] = value
-            }
-            image.setSaved()
-            return image
-        } else {
-            return null
-        }
+
+    static async count() {
+        const { count } = await knex('relationships').count('* as count').first()
+        // 文字列の可能性があるので Number に変換
+        return Number(count)
     }
 
     static #presence(x) {
@@ -212,15 +191,40 @@ class Image extends RecordBase {
         return !!x
     }
 
+    static #relationshipToDbParams(o) {
+        if (o) {
+            const toDb = {}
+            for (const [key, value] of Object.entries(o)) {
+                const columnName = Relationship.#propNameToDbColumnName(key)
+                if (columnName) toDb[columnName] = value
+            }
+            return toDb
+        } else {
+            return null
+        }
+    }
+
+    static #dbToRelationship(o) {
+        if (o) {
+            const relationship = new Relationship()
+            for (const [key, value] of Object.entries(o)) {
+                const propName = Relationship.#dbColumnNameToPropName(key)
+                if (propName) relationship[propName] = value
+            }
+            relationship.setSaved()
+            return relationship
+        } else {
+            return null
+        }
+    }
 
     static #propNameToDbColumnName(name) {
         switch (name) {
             case 'id': return 'id'
-            case 'micropostId': return 'micropost_id'
-            case 'fileName': return 'file_name'
-            case 'mimeType': return 'mime_type'
-            case 'size': return 'size'
+            case 'followerId': return 'follower_id'
+            case 'followedId': return 'followed_id'
             case 'createdAt': return 'created_at'
+            case 'updatedAt': return 'updated_at'
             default: return null
         }
     }
@@ -228,14 +232,13 @@ class Image extends RecordBase {
     static #dbColumnNameToPropName(name) {
         switch (name) {
             case 'id': return 'id'
-            case 'micropost_id': return 'micropostId'
-            case 'file_name': return 'fileName'
-            case 'mime_type': return 'mimeType'
-            case 'size': return 'size'
+            case 'follower_id': return 'followerId'
+            case 'followed_id': return 'followedId'
             case 'created_at': return 'createdAt'
+            case 'updated_at': return 'updatedAt'
             default: return null
         }
     }
 }
 
-module.exports = Image
+module.exports = Relationship
