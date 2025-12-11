@@ -6,6 +6,7 @@ const RecordBase = require('./record_base')
 const uid = require('uid-safe')
 const userMailer = require('../mailers/user_mailer')
 const Micropost = require('./micropost')
+const Relationship = require('./relationship')
 
 class User extends RecordBase {
     id // 自動で割り振られる。user.id = 3 等の id の手動での変更は save 時にエラーになる。変更しないこと
@@ -65,6 +66,20 @@ class User extends RecordBase {
             return await Micropost.findBy(params)
         }
         this.microposts = micropostsFunc
+
+        // relationshipとの関連付け
+        const activeRelationshipsFunc = async function () {
+            return await Relationship.findBy({ followerId: self.id })
+        }
+        activeRelationshipsFunc.build = function (params = {}) {
+            params.followerId = self.id
+            return new Relationship(params)
+        }
+        activeRelationshipsFunc.create = async function (params = {}) {
+            params.followerId = self.id
+            return await Relationship.create(params)
+        }
+        this.activeRelationships = activeRelationshipsFunc
     }
 
     // password関連のpropertyのgetter, setter methods

@@ -136,6 +136,16 @@ class Relationship extends RecordBase {
         return this
     }
 
+    async follower() {
+        const User = require('./user') // 循環参照を避けるためここに置く
+        return await User.find(this.followerId)
+    }
+
+    async followed() {
+        const User = require('./user') // 循環参照を避けるためここに置く
+        return await User.find(this.followedId)
+    }
+
     // static methods
 
     static async create(params = {}) {
