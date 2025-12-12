@@ -100,6 +100,40 @@ describe('user model test', () => {
         expect(afterCount).toBe(beforeCount - 1)
     })
 
+    test('should follow and unfollow a user', async () => {
+        const michael = new User(
+            {
+                name: 'Michael Example',
+                email: 'michael2@example.com',
+                password: 'password',
+                passwordConfirmation: 'password',
+                activated: true,
+                activatedAt: knex.fn.now()
+            })
+        await michael.save()
+
+        const archer = new User(
+            {
+                name: 'Sterling Archer',
+                email: 'duchess2@example.gov',
+                password: 'password',
+                passwordConfirmation: 'password',
+                activated: true,
+                activatedAt: knex.fn.now()
+            }
+        )
+        await archer.save()
+
+        expect(await michael.isFollowing(archer)).toBe(false)
+        await michael.follow(archer)
+        expect(await michael.isFollowing(archer)).toBe(true)
+        await michael.unfollow(archer)
+        expect(await michael.isFollowing(archer)).toBe(false)
+        // ユーザーは自分自身をフォローできない
+        await michael.follow(michael)
+        expect(await michael.isFollowing(michael)).toBe(false)
+    })
+
     afterAll(async () => {
         await knex.destroy() // コネクションを閉じる
     })

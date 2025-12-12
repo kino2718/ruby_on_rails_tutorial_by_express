@@ -80,6 +80,32 @@ class User extends RecordBase {
             return await Relationship.create(params)
         }
         this.activeRelationships = activeRelationshipsFunc
+
+        const following = async function () {
+            const rels = await activeRelationshipsFunc()
+            const ret = []
+            for (const r of rels) {
+                ret.push(await User.find(r.followedId))
+            }
+            return ret
+        }
+        following.include = async function (otherUser) {
+            const ret = await Relationship.findBy({ followerId: self.id, followedId: otherUser.id })
+            return 0 < ret.length
+        }
+        following.add = async function (otherUser) {
+            const ret = await Relationship.create({ followerId: self.id, followedId: otherUser.id })
+            return !!ret
+        }
+        following.delete = async function (otherUser) {
+            const rels = await Relationship.findBy({ followerId: self.id, followedId: otherUser.id })
+            const rel = rels?.at(0)
+            if (rel) {
+                await rel.destroy()
+                return true
+            } else return false
+        }
+        this.following = following
     }
 
     // password関連のpropertyのgetter, setter methods
@@ -440,6 +466,18 @@ class User extends RecordBase {
 
     async feedCount() {
         return await Micropost.count({ where: { userId: this.id } })
+    }
+
+    async follow(otherUser) {
+        if (this.id !== otherUser.id) await this.following.add(otherUser)
+    }
+
+    async unfollow(otherUser) {
+        await this.following.delete(otherUser)
+    }
+
+    async isFollowing(otherUser) {
+        return await this.following.include(otherUser)
     }
 
     // static methods
