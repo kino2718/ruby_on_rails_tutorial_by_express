@@ -1,4 +1,3 @@
-const User = require('../../app/models/user')
 const Micropost = require('../../app/models/micropost')
 const knexUtils = require('../../app/db/knex_utils')
 const knex = knexUtils.knex
@@ -10,21 +9,9 @@ describe('micropost test', () => {
     let microposts
 
     beforeAll(async () => {
-        await knex('users').del()
-
-        user = new User(
-            {
-                name: 'Michael Example',
-                email: 'michael@example.com',
-                password: 'password',
-                passwordConfirmation: 'password',
-                activated: true,
-                activatedAt: knex.fn.now()
-            })
-        await user.save()
-
+        const users = await testHelper.setupUsers()
+        user = users.michael
         micropost = user.microposts.build({ content: 'Lorem ipsum' })
-
         microposts = await testHelper.setupMicroposts(user)
     })
 

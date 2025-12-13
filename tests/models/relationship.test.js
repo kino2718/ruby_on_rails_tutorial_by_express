@@ -1,39 +1,17 @@
 const knexUtils = require('../../app/db/knex_utils')
 const knex = knexUtils.knex
-const User = require('../../app/models/user')
 const Relationship = require('../../app/models/relationship')
+const testHelper = require('../test_helper')
 
 describe('relationship test', () => {
     let michael
     let archer
     let relationship
 
-    beforeAll(async () => {
-        await knex('users').del()
-
-        michael = new User(
-            {
-                name: 'Michael Example',
-                email: 'michael@example.com',
-                password: 'password',
-                passwordConfirmation: 'password',
-                activated: true,
-                activatedAt: knex.fn.now()
-            })
-        await michael.save()
-
-        archer = new User(
-            {
-                name: 'Sterling Archer',
-                email: 'duchess@example.gov',
-                password: 'password',
-                passwordConfirmation: 'password',
-                activated: true,
-                activatedAt: knex.fn.now()
-            }
-        )
-        await archer.save()
-
+    beforeEach(async () => {
+        const users = await testHelper.setupUsers()
+        michael = users.michael
+        archer = users.archer
         relationship = new Relationship({ followerId: michael.id, followedId: archer.id })
     })
 

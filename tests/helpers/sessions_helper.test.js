@@ -9,17 +9,8 @@ describe('sessions helper test', () => {
     let mock
 
     beforeEach(async () => {
-        await knex('users').del()
-
-        user = new User(
-            {
-                name: 'Michael Example',
-                email: 'michael@example.com',
-                password: 'password',
-                passwordConfirmation: 'password',
-            })
-        await user.save()
-
+        const users = await testHelper.setupUsers()
+        user = users.michael
         mock = testHelper.mock() // res, reqの代わりに使う
         await sessionsHelper.remember(mock, user)
     })

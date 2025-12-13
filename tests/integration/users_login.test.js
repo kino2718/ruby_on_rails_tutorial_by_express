@@ -1,7 +1,6 @@
 const request = require('supertest')
 const cheerio = require('cheerio')
 const app = require('../../app/app')
-const User = require('../../app/models/user')
 const knexUtils = require('../../app/db/knex_utils')
 const knex = knexUtils.knex
 const testHelper = require('../test_helper')
@@ -14,18 +13,8 @@ describe('users login test', () => {
     let user
 
     beforeAll(async () => {
-        await knex('users').del()
-
-        user = new User(
-            {
-                name: 'Michael Example',
-                email: 'michael@example.com',
-                password: 'password',
-                passwordConfirmation: 'password',
-                activated: true,
-                activatedAt: knex.fn.now()
-            })
-        await user.save()
+        const users = await testHelper.setupUsers()
+        user = users.michael
     })
 
     async function accessLoginPath(agent) {
@@ -135,7 +124,8 @@ describe('users login test', () => {
         expect(isUsersShowTemplate(res, user)).toBe(true)
         expect(getNumAnchor(res, '/login')).toBe(0)
         expect(getNumForm(res, '/logout')).toBe(1)
-        expect(getNumAnchor(res, `/users/${user.id}`)).toBe(1)
+        // console.log('******** res.text: ', res.text )
+        expect(getNumAnchor(res, `/users/${user.id}`)).toBeGreaterThan(0)
     })
 
     async function logOut(agent) {

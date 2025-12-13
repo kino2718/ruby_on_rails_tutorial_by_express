@@ -47,12 +47,20 @@ async function logInAs(agent, email, password, rememberMe = '1') {
         })
 }
 
-async function setupUsers() {
-    await knex('users').del()
+async function saveOrGetUser(user) {
+    const u = (await User.findBy({ email: user.email }))?.at(0)
+    if (u) {
+        Object.assign(user, u)
+        user.setSaved()
+    } else {
+        await user.save()
+    }
+}
 
+async function setupUsers() {
     const users = {}
 
-    users.michael = await User.create(
+    users.michael = new User(
         {
             name: 'Michael Example',
             email: 'michael@example.com',
@@ -63,8 +71,9 @@ async function setupUsers() {
             activatedAt: knex.fn.now()
         }
     )
+    await saveOrGetUser(users.michael)
 
-    users.archer = await User.create(
+    users.archer = new User(
         {
             name: 'Sterling Archer',
             email: 'duchess@example.gov',
@@ -74,8 +83,9 @@ async function setupUsers() {
             activatedAt: knex.fn.now()
         }
     )
+    await saveOrGetUser(users.archer)
 
-    users.lana = await User.create(
+    users.lana = new User(
         {
             name: 'Lana Kane',
             email: 'hands@example.gov',
@@ -85,8 +95,9 @@ async function setupUsers() {
             activatedAt: knex.fn.now()
         }
     )
+    await saveOrGetUser(users.lana)
 
-    users.malory = await User.create(
+    users.malory = new User(
         {
             name: 'Malory Archer',
             email: 'boss@example.gov',
@@ -96,9 +107,11 @@ async function setupUsers() {
             activatedAt: knex.fn.now()
         }
     )
+    await saveOrGetUser(users.malory)
 
     for (let i = 0; i < 30; ++i) {
-        users[`user_${i}`] = await User.create(
+        const prop = `user_${i}`
+        users[prop] = new User(
             {
                 name: `User ${i}`,
                 email: `user-${i}@example.com`,
@@ -108,13 +121,14 @@ async function setupUsers() {
                 activatedAt: knex.fn.now()
             }
         )
+        await saveOrGetUser(users[prop])
     }
 
     return users
 }
 
 async function setupMicroposts(user) {
-    await knex('microposts').del()
+    await knex('microposts').del() // 呼び出すたびに初期化
     const microposts = {}
     let m
 

@@ -14,7 +14,6 @@ describe('users signup test', () => {
     const transporter = transporterFactory.createTransporter()
 
     beforeEach(async () => {
-        await knex('users').del()
         transporter.clear()
     })
 
@@ -71,6 +70,12 @@ describe('users signup test', () => {
         return res
     }
 
+    async function cleanupSignup() {
+        const users = await User.findBy({ email: 'user@example.com' })
+        const user = users?.at(0)
+        await user?.destroy()
+    }
+
     test('valid signup information with account activation', async () => {
         const agent = request.agent(app)
         // 現在のユーザ数を取得
@@ -82,6 +87,7 @@ describe('users signup test', () => {
         // validation mailの件数を確認
         const mailCount = transporterFactory.mockTransporter.count
         expect(mailCount).toBe(1)
+        await cleanupSignup()
     })
 
     test('should not be activated', async () => {
@@ -91,6 +97,7 @@ describe('users signup test', () => {
         expect(users.length).toBe(1)
         const user = users[0]
         expect(user.activated).toBeFalsy()
+        await cleanupSignup()
     })
 
     test('should not be able to log in before account activation', async () => {
@@ -98,6 +105,7 @@ describe('users signup test', () => {
         await validSignup(agent)
         await testHelper.logInAs(agent, 'user@example.com', 'password')
         expect(await testHelper.isLoggedIn(agent)).toBe(false)
+        await cleanupSignup()
     })
 
     async function activation(agent, token, email) {
@@ -111,6 +119,7 @@ describe('users signup test', () => {
         await testHelper.logInAs(agent, 'user@example.com', 'password')
         await activation(agent, 'invalid token', 'user@example.com')
         expect(await testHelper.isLoggedIn(agent)).toBe(false)
+        await cleanupSignup()
     })
 
     function getToken() {
@@ -128,6 +137,7 @@ describe('users signup test', () => {
         const token = getToken()
         await activation(agent, token, 'wrong')
         expect(await testHelper.isLoggedIn(agent)).toBe(false)
+        await cleanupSignup()
     })
 
     test('should log in successfully with valid activation token and email', async () => {
@@ -137,6 +147,7 @@ describe('users signup test', () => {
         const token = getToken()
         await activation(agent, token, 'user@example.com')
         expect(await testHelper.isLoggedIn(agent)).toBe(true)
+        await cleanupSignup()
     })
 
     afterAll(async () => {

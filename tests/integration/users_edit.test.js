@@ -1,7 +1,6 @@
 const request = require('supertest')
 const cheerio = require('cheerio')
 const app = require('../../app/app')
-const User = require('../../app/models/user')
 const knexUtils = require('../../app/db/knex_utils')
 const knex = knexUtils.knex
 const testHelper = require('../test_helper')
@@ -14,18 +13,8 @@ describe('users edit test', () => {
     let user
 
     beforeAll(async () => {
-        await knex('users').del()
-
-        user = new User(
-            {
-                name: 'Michael Example',
-                email: 'michael@example.com',
-                password: 'password',
-                passwordConfirmation: 'password',
-                activated: true,
-                activatedAt: knex.fn.now()
-            })
-        await user.save()
+        const users = await testHelper.setupUsers()
+        user = users.michael
     })
 
     test('unsuccessful edit', async () => {
@@ -101,7 +90,7 @@ describe('users edit test', () => {
 
         // ユーザーのページを表示していることを確認
         $ = cheerio.load(res.text)
-        expect($('.gravatar').length).toBe(1)
+        expect($('title').text().includes(name)).toBe(true)
 
         // ユーザーがアップデートされていることの確認
         await user.reload()

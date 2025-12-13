@@ -20,7 +20,7 @@ describe('users index test', () => {
         admin = users.michael
         nonAdmin = users.archer
         nonAdmin2 = users.lana
-    }, 30 * 1000) // セットアップに時間がかかるのでタイムアウト(デフォルト5秒)を伸ばす
+    })
 
     test('index as admin including pagination and delete links', async () => {
         const agent = request.agent(app)

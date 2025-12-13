@@ -3,7 +3,6 @@ const app = require('../../app/app')
 const knexUtils = require('../../app/db/knex_utils')
 const knex = knexUtils.knex
 const testHelper = require('../test_helper')
-const User = require('../../app/models/user')
 const Micropost = require('../../app/models/micropost')
 
 const REDIRECT = 302
@@ -15,34 +14,11 @@ describe('microposts controller test', () => {
     let micropost
 
     beforeAll(async () => {
-        await knex('users').del()
-
-        michael = new User(
-            {
-                name: 'Michael Example',
-                email: 'michael@example.com',
-                password: 'password',
-                passwordConfirmation: 'password',
-                activated: true,
-                activatedAt: knex.fn.now()
-            })
-        await michael.save()
-
+        const users = await testHelper.setupUsers()
+        michael = users.michael
         microposts = await testHelper.setupMicroposts(michael)
         micropost = microposts.orange
-
-        archer = new User(
-            {
-                name: 'Sterling Archer',
-                email: 'duchess@example.gov',
-                password: 'password',
-                passwordConfirmation: 'password',
-                activated: true,
-                activatedAt: knex.fn.now()
-            }
-        )
-        await archer.save()
-
+        archer = users.archer
         const m = await archer.microposts.create({ content: "Oh, is that what you want? Because that's how you get ants!" })
         await m.updateAttribute('createdAt', knex.raw("datetime('now', '-2 years')"))
         microposts.ants = m

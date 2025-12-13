@@ -14,30 +14,9 @@ describe('users controller test', () => {
     let otherUser
 
     beforeAll(async () => {
-        await knex('users').del()
-
-        user = new User(
-            {
-                name: 'Michael Example',
-                email: 'michael@example.com',
-                password: 'password',
-                passwordConfirmation: 'password',
-                admin: true,
-                activated: true,
-                activatedAt: knex.fn.now()
-            })
-        await user.save()
-
-        otherUser = new User(
-            {
-                name: 'Sterling Archer',
-                email: 'duchess@example.gov',
-                password: 'password',
-                passwordConfirmation: 'password',
-                activated: true,
-                activatedAt: knex.fn.now()
-            })
-        await otherUser.save()
+        const users = await testHelper.setupUsers()
+        user = users.michael
+        otherUser = users.archer
     })
 
     test('should get new', async () => {

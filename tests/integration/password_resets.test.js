@@ -11,22 +11,13 @@ const REDIRECT = 302
 const UNPROCESSABLE_ENTITY = 422
 
 describe('password resets test', () => {
+  let user
   // test用のmock
   const transporter = transporterFactory.createTransporter()
 
   beforeAll(async () => {
-    await knex('users').del()
-
-    const user = new User(
-      {
-        name: 'Michael Example',
-        email: 'michael@example.com',
-        password: 'password',
-        passwordConfirmation: 'password',
-        activated: true,
-        activatedAt: knex.fn.now()
-      })
-    await user.save()
+    const users = await testHelper.setupUsers()
+    user = users.michael
   })
 
   beforeEach(async () => {
@@ -71,18 +62,16 @@ describe('password resets test', () => {
     expect(isFlashEmpty(res)).toBe(false)
   })
 
-  let user
-  let resetUser
-
   async function getUser(email) {
     const users = await User.findBy({ email: email })
     return users?.at(0)
   }
 
-  async function setupPasswordResetFrom(agent) {
-    user = await getUser('michael@example.com')
-    const res = await postResetsPath(agent, 'michael@example.com')
-    resetUser = await getUser('michael@example.com')
+  let resetUser
+
+  async function setupPasswordResetForm(agent) {
+    const res = await postResetsPath(agent, user.email)
+    resetUser = await getUser(user.email)
     return res
   }
 
@@ -92,7 +81,7 @@ describe('password resets test', () => {
 
   test('reset with valid email', async () => {
     const agent = request.agent(app)
-    let res = await setupPasswordResetFrom(agent)
+    let res = await setupPasswordResetForm(agent)
     expect(user.resetDigest).not.toBe(resetUser.resetDigest)
     // reset mailの件数を確認
     expect(transporterFactory.mockTransporter.count).toBe(1)
@@ -117,7 +106,7 @@ describe('password resets test', () => {
 
   test('reset with wrong email', async () => {
     const agent = request.agent(app)
-    await setupPasswordResetFrom(agent)
+    await setupPasswordResetForm(agent)
     const token = getToken()
     let res = await getEditPasswordResetPath(agent, token, '')
     expect(isRedirectTo(res, '/')).toBe(true)
@@ -125,7 +114,7 @@ describe('password resets test', () => {
 
   test('reset with inactive user', async () => {
     const agent = request.agent(app)
-    await setupPasswordResetFrom(agent)
+    await setupPasswordResetForm(agent)
     const token = getToken()
 
     // resetUserをinactiveにする
@@ -140,7 +129,7 @@ describe('password resets test', () => {
 
   test('reset with right email but wrong token', async () => {
     const agent = request.agent(app)
-    await setupPasswordResetFrom(agent)
+    await setupPasswordResetForm(agent)
     let res = await getEditPasswordResetPath(agent, 'wrong token', resetUser.email)
     expect(isRedirectTo(res, '/')).toBe(true)
   })
@@ -154,7 +143,7 @@ describe('password resets test', () => {
 
   test('reset with right email and right token', async () => {
     const agent = request.agent(app)
-    await setupPasswordResetFrom(agent)
+    await setupPasswordResetForm(agent)
     const token = getToken()
     const res = await getEditPasswordResetPath(agent, token, resetUser.email)
     expect(isPasswordResetsEditTemplate(res)).toBe(true)
@@ -177,7 +166,7 @@ describe('password resets test', () => {
 
   test('update with invalid password and confirmation', async () => {
     const agent = request.agent(app)
-    await setupPasswordResetFrom(agent)
+    await setupPasswordResetForm(agent)
     const token = getToken()
     const res = await postPasswordResetPath(agent, token, resetUser.email, 'foobaz', 'barquux')
     const $ = cheerio.load(res.text)
@@ -186,17 +175,28 @@ describe('password resets test', () => {
 
   test('update with empty password', async () => {
     const agent = request.agent(app)
-    await setupPasswordResetFrom(agent)
+    await setupPasswordResetForm(agent)
     const token = getToken()
     const res = await postPasswordResetPath(agent, token, resetUser.email, '', '')
     const $ = cheerio.load(res.text)
     expect($('div#error_explanation').length).toBe(1)
   })
 
+  async function logOut(agent) {
+    const csrfToken = await testHelper.getCsrfToken(agent)
+    const res = await agent
+      .post('/logout')
+      .type('form')
+      .send({
+        _csrf: csrfToken,
+      })
+    return res
+  }
+
   test('update with valid password and confirmation', async () => {
     const agent = request.agent(app)
-    await setupPasswordResetFrom(agent)
-    const token = getToken()
+    await setupPasswordResetForm(agent)
+    let token = getToken()
     let res = await postPasswordResetPath(agent, token, resetUser.email, 'foobaz', 'foobaz')
     expect(res.status).toBe(REDIRECT)
     expect(isRedirectTo(res, `/users/${resetUser.id}`)).toBe(true)
@@ -205,6 +205,19 @@ describe('password resets test', () => {
     // ログインしていることの確認
     const isLoggedIn = await testHelper.isLoggedIn(agent)
     expect(isLoggedIn).toBe(true)
+    expect(isFlashEmpty(res)).toBe(false)
+    // passwordを元に戻す
+    await logOut(agent)
+    await setupPasswordResetForm(agent)
+    token = getToken()
+    res = await postPasswordResetPath(agent, token, resetUser.email, user.password, user.passwordConfirmation)
+    expect(res.status).toBe(REDIRECT)
+    expect(isRedirectTo(res, `/users/${resetUser.id}`)).toBe(true)
+    // リダイレクト先にアクセス
+    res = await agent.get(res.headers.location)
+    // ログインしていることの確認
+    const isLoggedIn2 = await testHelper.isLoggedIn(agent)
+    expect(isLoggedIn2).toBe(true)
     expect(isFlashEmpty(res)).toBe(false)
   })
 
