@@ -67,25 +67,32 @@ class User extends RecordBase {
         }
         this.microposts = micropostsFunc
 
-        // relationshipとの関連付け
-        const activeRelationshipsFunc = async function () {
+        // activeRelationships関連
+        const activeRelationships = async function () {
             return await Relationship.findBy({ followerId: self.id })
         }
-        activeRelationshipsFunc.build = function (params = {}) {
+        activeRelationships.build = function (params = {}) {
             params.followerId = self.id
             return new Relationship(params)
         }
-        activeRelationshipsFunc.create = async function (params = {}) {
+        activeRelationships.create = async function (params = {}) {
             params.followerId = self.id
             return await Relationship.create(params)
         }
-        this.activeRelationships = activeRelationshipsFunc
+        this.activeRelationships = activeRelationships
 
+        // passiveRelationships関連
+        const passiveRelationships = async function () {
+            return await Relationship.findBy({ followedId: self.id })
+        }
+        this.passiveRelationships = passiveRelationships
+
+        // following関連
         const following = async function () {
-            const rels = await activeRelationshipsFunc()
+            const rels = await activeRelationships()
             const ret = []
             for (const r of rels) {
-                ret.push(await User.find(r.followedId))
+                ret.push(await r.followed())
             }
             return ret
         }
@@ -106,6 +113,20 @@ class User extends RecordBase {
             } else return false
         }
         this.following = following
+
+        // followers関連
+        const followers = async function () {
+            const rels = await passiveRelationships()
+            const ret = []
+            for (const r of rels) {
+                ret.push(await r.follower())
+            }
+        }
+        followers.include = async function (otherUser) {
+            const ret = await Relationship.findBy({ followedId: self.id, followerId: otherUser.id })
+            return 0 < ret.length
+        }
+        this.followers = followers
     }
 
     // password関連のpropertyのgetter, setter methods
