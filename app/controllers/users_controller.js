@@ -64,13 +64,21 @@ async function show(req, res) {
         micropostUsers.push(await m.user())
     }
 
+    const currentUser = await sessionsHelper.currentUser(req)
+    const isCurrentUserFollowing = await currentUser?.isFollowing(user)
+    const followingCount = await user?.following.count()
+    const followersCount = await user?.followers.count()
+
     res.render('users/show', {
         title: user.name,
-        user: user,
-        microposts: microposts,
-        nMicroposts: nMicroposts,
-        micropostUsers: micropostUsers,
-        pagination: { current: page, totalPages: totalPages }
+        user,
+        microposts,
+        nMicroposts,
+        micropostUsers,
+        pagination: { current: page, totalPages: totalPages },
+        isCurrentUserFollowing,
+        followingCount,
+        followersCount,
     })
 }
 

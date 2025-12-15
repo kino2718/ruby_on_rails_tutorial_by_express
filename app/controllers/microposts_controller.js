@@ -64,8 +64,11 @@ async function create(req, res) {
         for (const m of feedItems) {
             feedUsers.push(await m.user())
         }
+        const followingCount = await user.following.count()
+        const followersCount = await user.followers.count()
         res.status(422).render('static_pages/home', {
-            micropost: micropost, feedItems: feedItems, feedUsers: feedUsers, pagination: { current: page, totalPages: totalPages }
+            micropost, feedItems, feedUsers, pagination: { current: page, totalPages: totalPages },
+            user, followingCount, followersCount
         })
     }
 }

@@ -7,10 +7,16 @@
             <%- gravatarFor(user) %>
             <%= user.name %>
         </h1>
+      <section class="stats">
+        <%- include('../shared/_stats') %>
+      </section>
       </h1>
     </section>
   </aside>
   <div class="col-md-8">
+    <% if (hasLoggedIn) { %>
+      <%- include('./_follow_form') %>
+    <% } %>
     <% if (nMicroposts) { %>
       <h3>Microposts (<%= nMicroposts %>)</h3>
       <ol class="microposts">

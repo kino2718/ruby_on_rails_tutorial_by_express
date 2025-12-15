@@ -112,6 +112,9 @@ class User extends RecordBase {
                 return true
             } else return false
         }
+        following.count = async function () {
+            return await Relationship.count({ followerId: self.id })
+        }
         this.following = following
 
         // followers関連
@@ -125,6 +128,9 @@ class User extends RecordBase {
         followers.include = async function (otherUser) {
             const ret = await Relationship.findBy({ followedId: self.id, followerId: otherUser.id })
             return 0 < ret.length
+        }
+        followers.count = async function () {
+            return await Relationship.count({ followedId: self.id })
         }
         this.followers = followers
     }

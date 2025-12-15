@@ -1,0 +1,7 @@
+<form action="/relationships" accept-charset="UTF-8" method="post">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
+    <div>
+        <input type="hidden" name="followed_id" id="followed_id" value="<%= user.id %>" autocomplete="off" />
+    </div>
+    <input type="submit" name="commit" value="Follow" class="btn btn-primary" />
+</form>

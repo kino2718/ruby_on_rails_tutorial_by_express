@@ -186,8 +186,9 @@ class Relationship extends RecordBase {
     }
 
 
-    static async count() {
-        const { count } = await knex('relationships').count('* as count').first()
+    static async count(params = {}) {
+        const dbParams = Relationship.#relationshipToDbParams(params)
+        const { count } = await knex('relationships').where(dbParams).count('* as count').first()
         // 文字列の可能性があるので Number に変換
         return Number(count)
     }

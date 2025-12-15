@@ -1,0 +1,9 @@
+<% if (currentUser.id !== user.id) { %>
+    <div id="follow_form">
+        <% if (isCurrentUserFollowing) { %>
+            <%- include('./_unfollow') %>
+        <% } else { %>
+            <%- include('./_follow') %>
+        <% } %>
+    </div>
+<% } %>
