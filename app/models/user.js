@@ -115,6 +115,14 @@ class User extends RecordBase {
         following.count = async function () {
             return await Relationship.count({ followerId: self.id })
         }
+        following.paginate = async function (perPage, offset) {
+            const rels = await Relationship.paginate(perPage, offset, { followerId: self.id })
+            const users = []
+            for (const r of rels) {
+                users.push(await r.followed())
+            }
+            return users
+        }
         this.following = following
 
         // followers関連
@@ -124,6 +132,7 @@ class User extends RecordBase {
             for (const r of rels) {
                 ret.push(await r.follower())
             }
+            return ret
         }
         followers.include = async function (otherUser) {
             const ret = await Relationship.findBy({ followedId: self.id, followerId: otherUser.id })
@@ -131,6 +140,14 @@ class User extends RecordBase {
         }
         followers.count = async function () {
             return await Relationship.count({ followedId: self.id })
+        }
+        followers.paginate = async function (perPage, offset) {
+            const rels = await Relationship.paginate(perPage, offset, { followedId: self.id })
+            const users = []
+            for (const r of rels) {
+                users.push(await r.follower())
+            }
+            return users
         }
         this.followers = followers
     }

@@ -1,6 +1,7 @@
 const cheerio = require('cheerio')
 const { faker } = require('@faker-js/faker')
 const User = require('../app/models/user')
+const Relationships = require('../app/models/relationship')
 const knexUtils = require('../app/db/knex_utils')
 const knex = knexUtils.knex
 
@@ -158,6 +159,21 @@ async function setupMicroposts(user) {
     return microposts
 }
 
+async function setupRelationships(users) {
+    const michael = users.michael
+    const archer = users.archer
+    const lana = users.lana
+    const malory = users.malory
+    const relationships = {}
+
+    relationships.one = await Relationships.create({ followerId: michael.id, followedId: lana.id })
+    relationships.two = await Relationships.create({ followerId: michael.id, followedId: malory.id })
+    relationships.three = await Relationships.create({ followerId: lana.id, followedId: michael.id })
+    relationships.four = await Relationships.create({ followerId: archer.id, followedId: michael.id })
+
+    return relationships
+}
+
 async function postMicropost(agent, content) {
     const csrfToken = await getCsrfToken(agent)
     return await agent
@@ -193,6 +209,7 @@ module.exports = {
     logInAs,
     setupUsers,
     setupMicroposts,
+    setupRelationships,
     postMicropost,
     deleteMicropost,
     getCsrfToken,

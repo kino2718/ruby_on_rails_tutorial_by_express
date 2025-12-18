@@ -227,7 +227,34 @@ describe('users controller test', () => {
         expect(res.headers.location).toBe('/')
     })
 
+    test('should redirect following when not logged in', async () => {
+        const agent = request.agent(app)
+        const res = await agent.get(`/users/${user.id}/following`)
+        // リダイレクト先が/loginであることを確認
+        expect(res.status).toBe(REDIRECT)
+        expect(res.headers.location).toBe('/login')
+    })
+
+    test('should redirect followers when not logged in', async () => {
+        const agent = request.agent(app)
+        const res = await agent.get(`/users/${user.id}/followers`)
+        // リダイレクト先が/loginであることを確認
+        expect(res.status).toBe(REDIRECT)
+        expect(res.headers.location).toBe('/login')
+    })
+
     afterAll(async () => {
         await knex.destroy() // コネクションを閉じる
     })
 })
+/*
+  test "should redirect following when not logged in" do
+    get following_user_path(@user)
+    assert_redirected_to login_url
+  end
+
+  test "should redirect followers when not logged in" do
+    get followers_user_path(@user)
+    assert_redirected_to login_url
+  end
+*/

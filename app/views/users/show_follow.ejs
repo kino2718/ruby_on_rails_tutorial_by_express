@@ -1,0 +1,52 @@
+<%- include('../layouts/header') -%>
+
+<div class="row">
+    <aside class="col-md-4">
+        <section class="user_info">
+            <%- gravatarFor(user) %>
+            <h1>
+                <%= user.name %>
+            </h1>
+            <span>
+                <a href="/users/<%= user.id %>">view my profile</a>
+            </span>
+            <span>
+                <strong>Microposts:</strong> <%= micropostsCount %>
+            </span>
+        </section>
+        <section class="stats">
+            <%- include('../shared/_stats') %>
+            <% if (users.length) { %>
+                <div class="user_avatars">
+                    <% for (const u of users) { %>
+                        <a href="/users/<%= u.id %>">
+                            <%- gravatarFor(u, {size: 30}) %>
+                        </a>
+                    <% } %>
+                </div>
+            <% } %>
+        </section>
+    </aside>
+    <div class="col-md-8">
+        <h3><%= title %></h3>
+        <% if (users.length) { %>
+            <ul class="users follow">
+                 <% for (const u of users) { %>
+                    <li>
+                        <%- gravatarFor(u, {size: 50}) %>
+                        <a href="/users/<%= u.id %>" class="text-decoration-none"><%= u.name %></a>
+                        <% if (currentUser && currentUser.admin && currentUser.id !== u.id) { %>
+                            <!-- POSTでdeleteするためformを使用 -->
+                            <form action="/users/<%= u.id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('You sure?');">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>" autocomplete="off" />
+                                | <button type="submit" class="btn btn-link p-0 align-baseline text-decoration-none">delete</button>
+                            </form>
+                        <% } %>
+                    </li>
+                <% } %>
+            </ul>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../layouts/footer') -%>

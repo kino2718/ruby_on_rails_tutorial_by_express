@@ -30,6 +30,14 @@ router.post('/:userId/delete', csrfHelper.verifyCsrfToken, loggedInUser, adminUs
     await destroy(req, res)
 })
 
+router.get('/:userId/following', loggedInUser, async (req, res) => {
+    await following(req, res)
+})
+
+router.get('/:userId/followers', loggedInUser, async (req, res) => {
+    await followers(req, res)
+})
+
 async function index(req, res) {
     const page = parseInt(req.query.page) || 1
     const perPage = 30
@@ -134,6 +142,52 @@ async function destroy(req, res) {
     }
     let baseUrl = req.baseUrl
     res.redirect(`${baseUrl}`)
+}
+
+async function following(req, res) {
+    const userId = req.params.userId
+    const title = 'Following'
+    const user = await User.find(userId)
+
+    const page = parseInt(req.query.page) || 1
+    const perPage = 30
+    const totalCount = await user.following.count()
+    const totalPages = Math.ceil(totalCount / perPage)
+    const offset = (page - 1) * perPage
+    const pagination = { current: page, totalPages: totalPages }
+    const users = await user.following.paginate(perPage, offset)
+
+    const micropostsCount = await user.microposts.count()
+    const followingCount = totalCount
+    const followersCount = await user.followers.count()
+    res.render('users/show_follow', {
+        title, user, users, micropostsCount,
+        followingCount, followersCount,
+        pagination
+    })
+}
+
+async function followers(req, res) {
+    const userId = req.params.userId
+    const title = 'Followers'
+    const user = await User.find(userId)
+
+    const page = parseInt(req.query.page) || 1
+    const perPage = 30
+    const totalCount = await user.followers.count()
+    const totalPages = Math.ceil(totalCount / perPage)
+    const offset = (page - 1) * perPage
+    const pagination = { current: page, totalPages: totalPages }
+    const users = await user.followers.paginate(perPage, offset)
+
+    const micropostsCount = await user.microposts.count()
+    const followingCount = await user.following.count()
+    const followersCount = totalCount
+    res.render('users/show_follow', {
+        title, user, users, micropostsCount,
+        followingCount, followersCount,
+        pagination
+    })
 }
 
 async function correctUser(req, res, next) {

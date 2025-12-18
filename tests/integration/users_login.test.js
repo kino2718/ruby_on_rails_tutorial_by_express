@@ -124,7 +124,6 @@ describe('users login test', () => {
         expect(isUsersShowTemplate(res, user)).toBe(true)
         expect(getNumAnchor(res, '/login')).toBe(0)
         expect(getNumForm(res, '/logout')).toBe(1)
-        // console.log('******** res.text: ', res.text )
         expect(getNumAnchor(res, `/users/${user.id}`)).toBeGreaterThan(0)
     })
 

@@ -185,6 +185,17 @@ class Relationship extends RecordBase {
         }
     }
 
+    static async paginate(perPage, offset, params = {}) {
+        const params2 = Relationship.#relationshipToDbParams(params)
+        try {
+            const li = await knex('relationships').select('*').where(params2)
+                .orderBy('id', 'asc').limit(perPage).offset(offset)
+            return li.map(o => Relationship.#dbToRelationship(o))
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }
 
     static async count(params = {}) {
         const dbParams = Relationship.#relationshipToDbParams(params)
