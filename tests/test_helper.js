@@ -202,6 +202,13 @@ async function getCsrfToken(agent) {
     return locals.csrfToken
 }
 
+const REDIRECT = 302
+
+function isRedirectTo(res, url) {
+    return (res.status === REDIRECT) && (res.headers.location === url)
+}
+
+
 module.exports = {
     mock,
     isLoggedInMock,
@@ -213,4 +220,5 @@ module.exports = {
     postMicropost,
     deleteMicropost,
     getCsrfToken,
+    isRedirectTo,
 }

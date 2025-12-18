@@ -79,6 +79,10 @@ class User extends RecordBase {
             params.followerId = self.id
             return await Relationship.create(params)
         }
+        activeRelationships.findBy = async function (params = {}) {
+            params.followerId = self.id
+            return await Relationship.findBy(params)
+        }
         this.activeRelationships = activeRelationships
 
         // passiveRelationships関連

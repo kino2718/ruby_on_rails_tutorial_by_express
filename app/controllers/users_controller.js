@@ -73,7 +73,12 @@ async function show(req, res) {
     }
 
     const currentUser = await sessionsHelper.currentUser(req)
-    const isCurrentUserFollowing = await currentUser?.isFollowing(user)
+    let relationshipId = null
+    if (currentUser && user) {
+        const rels = await currentUser.activeRelationships.findBy({ followedId: user.id })
+        const rel = rels.at(0)
+        relationshipId = rel?.id
+    }
     const followingCount = await user?.following.count()
     const followersCount = await user?.followers.count()
 
@@ -84,7 +89,7 @@ async function show(req, res) {
         nMicroposts,
         micropostUsers,
         pagination: { current: page, totalPages: totalPages },
-        isCurrentUserFollowing,
+        relationshipId,
         followingCount,
         followersCount,
     })

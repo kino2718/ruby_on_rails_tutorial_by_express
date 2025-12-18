@@ -18,7 +18,7 @@ module.exports = {
         conn.run('PRAGMA foreign_keys = ON', cb)
       },
     },
-    debug: true,
+    // debug: true,
     ...shared,
   },
 

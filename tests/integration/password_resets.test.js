@@ -75,10 +75,6 @@ describe('password resets test', () => {
     return res
   }
 
-  function isRedirectTo(res, url) {
-    return (res.status === REDIRECT) && (res.headers.location === url)
-  }
-
   test('reset with valid email', async () => {
     const agent = request.agent(app)
     let res = await setupPasswordResetForm(agent)
@@ -86,7 +82,7 @@ describe('password resets test', () => {
     // reset mailの件数を確認
     expect(transporterFactory.mockTransporter.count).toBe(1)
 
-    expect(isRedirectTo(res, '/')).toBe(true)
+    expect(testHelper.isRedirectTo(res, '/')).toBe(true)
     // リダイレクト先にアクセス
     res = await agent.get(res.headers.location)
     expect(isFlashEmpty(res)).toBe(false)
@@ -109,7 +105,7 @@ describe('password resets test', () => {
     await setupPasswordResetForm(agent)
     const token = getToken()
     let res = await getEditPasswordResetPath(agent, token, '')
-    expect(isRedirectTo(res, '/')).toBe(true)
+    expect(testHelper.isRedirectTo(res, '/')).toBe(true)
   })
 
   test('reset with inactive user', async () => {
@@ -121,7 +117,7 @@ describe('password resets test', () => {
     await resetUser.updateAttribute('activated', false)
 
     let res = await getEditPasswordResetPath(agent, token, resetUser.email)
-    expect(isRedirectTo(res, '/')).toBe(true)
+    expect(testHelper.isRedirectTo(res, '/')).toBe(true)
 
     // resetUserをactiveに戻す
     await resetUser.updateAttribute('activated', true)
@@ -131,7 +127,7 @@ describe('password resets test', () => {
     const agent = request.agent(app)
     await setupPasswordResetForm(agent)
     let res = await getEditPasswordResetPath(agent, 'wrong token', resetUser.email)
-    expect(isRedirectTo(res, '/')).toBe(true)
+    expect(testHelper.isRedirectTo(res, '/')).toBe(true)
   })
 
   function isPasswordResetsEditTemplate(res) {
@@ -199,7 +195,7 @@ describe('password resets test', () => {
     let token = getToken()
     let res = await postPasswordResetPath(agent, token, resetUser.email, 'foobaz', 'foobaz')
     expect(res.status).toBe(REDIRECT)
-    expect(isRedirectTo(res, `/users/${resetUser.id}`)).toBe(true)
+    expect(testHelper.isRedirectTo(res, `/users/${resetUser.id}`)).toBe(true)
     // リダイレクト先にアクセス
     res = await agent.get(res.headers.location)
     // ログインしていることの確認
@@ -212,7 +208,7 @@ describe('password resets test', () => {
     token = getToken()
     res = await postPasswordResetPath(agent, token, resetUser.email, user.password, user.passwordConfirmation)
     expect(res.status).toBe(REDIRECT)
-    expect(isRedirectTo(res, `/users/${resetUser.id}`)).toBe(true)
+    expect(testHelper.isRedirectTo(res, `/users/${resetUser.id}`)).toBe(true)
     // リダイレクト先にアクセス
     res = await agent.get(res.headers.location)
     // ログインしていることの確認
