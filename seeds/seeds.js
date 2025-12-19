@@ -1,6 +1,12 @@
 const { faker } = require('@faker-js/faker')
 const User = require('../app/models/user')
 
+function mySleep(ms) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms)
+    })
+}
+
 /**
  * @param { import('knex').Knex } knex
  * @returns { Promise<void> }
@@ -38,7 +44,9 @@ exports.seed = async function (knex) {
         const content = faker.lorem.sentence(5)
         for (const user of users) {
             await user.microposts.create({ content: content })
+            await mySleep(100) // 連続してデータを作成すると時刻が一緒になってしまうので適当にsleepする
         }
+        await mySleep(1000)
     }
 
     // ユーザーフォローのリレーションシップを作成する
