@@ -12,7 +12,7 @@ describe('micropost test', () => {
         const users = await testHelper.setupUsers()
         user = users.michael
         micropost = user.microposts.build({ content: 'Lorem ipsum' })
-        microposts = await testHelper.setupMicroposts(user)
+        microposts = await testHelper.setupMicroposts(users)
     })
 
     test('should be valid', () => {

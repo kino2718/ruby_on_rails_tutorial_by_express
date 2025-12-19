@@ -12,7 +12,7 @@ describe('users profile test', () => {
         const users = await testHelper.setupUsers()
         user = users.michael
 
-        await testHelper.setupMicroposts(user)
+        await testHelper.setupMicroposts(users)
     })
 
     async function getUserPath(agent, user) {

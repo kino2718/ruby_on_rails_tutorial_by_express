@@ -128,34 +128,48 @@ async function setupUsers() {
     return users
 }
 
-async function setupMicroposts(user) {
+async function setupMicroposts(users) {
     await knex('microposts').del() // 呼び出すたびに初期化
     const microposts = {}
     let m
 
-    m = await user.microposts.create({ content: 'I just ate an orange!' })
+    const michael = users.michael
+    m = await michael.microposts.create({ content: 'I just ate an orange!' })
     await m.updateAttribute('createdAt', knex.raw("datetime('now', '-10 minutes')")) // sqlite3用
     microposts.orange = m
 
-    m = await user.microposts.create({ content: 'Check out the @tauday site by @mhartl: https://tauday.com' })
+    m = await michael.microposts.create({ content: 'Check out the @tauday site by @mhartl: https://tauday.com' })
     await m.updateAttribute('createdAt', knex.raw("datetime('now', '-3 years')"))
     microposts.tauManifesto = m
 
-    m = await user.microposts.create({ content: 'Sad cats are sad: https://youtu.be/PKffm2uI4dk' })
+    m = await michael.microposts.create({ content: 'Sad cats are sad: https://youtu.be/PKffm2uI4dk' })
     await m.updateAttribute('createdAt', knex.raw("datetime('now', '-2 hours')"))
     microposts.catVideo = m
 
-    m = await user.microposts.create({ content: 'Writing a short test' })
+    m = await michael.microposts.create({ content: 'Writing a short test' })
     await m.updateAttribute('createdAt', knex.fn.now())
     microposts.mostRecent = m
 
     for (let i = 0; i < 30; ++i) {
         const content = faker.lorem.sentence(5)
-        m = await user.microposts.create({ content: content })
+        m = await michael.microposts.create({ content: content })
         await m.updateAttribute('createdAt', knex.raw("datetime('now', '-42 days')"))
         microposts[`micropost_${i}`] = m
     }
 
+    const archer = users.archer
+    m = await archer.microposts.create({ content: "Oh, is that what you want? Because that's how you get ants!" })
+    await m.updateAttribute('createdAt', knex.raw("datetime('now', '-2 years')"))
+    microposts.ants = m
+
+    m = await archer.microposts.create({ content: '"Danger zone!' })
+    await m.updateAttribute('createdAt', knex.raw("datetime('now', '-3 days')"))
+    microposts.zone = m
+
+    const lana = users.lana
+    m = await lana.microposts.create({ content: "I'm sorry. Your words made sense, but your sarcastic tone did not." })
+    await m.updateAttribute('createdAt', knex.raw("datetime('now', '-10 minutes')"))
+    microposts.tone = m
     return microposts
 }
 

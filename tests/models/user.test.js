@@ -117,6 +117,30 @@ describe('user model test', () => {
         expect(await michael.isFollowing(michael)).toBe(false)
     })
 
+    test('feed should have the right posts', async () => {
+        const users = await testHelper.setupUsers()
+        await testHelper.setupMicroposts(users)
+        await testHelper.setupRelationships(users)
+        const michael = users.michael
+        const archer = users.archer
+        const lana = users.lana
+        // フォローしているユーザーの投稿を確認
+        for (const postFollowing of await lana.microposts()) {
+            const feed = await michael.feed(Number.MAX_SAFE_INTEGER, 0)
+            expect(feed.some(post => post.id === postFollowing.id)).toBe(true)
+        }
+        // フォロワーがいるユーザー自身の投稿を確認
+        for (const postSelf of await michael.microposts()) {
+            const feed = await michael.feed(Number.MAX_SAFE_INTEGER, 0)
+            expect(feed.some(post => post.id === postSelf.id)).toBe(true)
+        }
+        // フォローしていないユーザーの投稿を確認
+        for (const postUnfollowed of await archer.microposts()) {
+            const feed = await michael.feed(Number.MAX_SAFE_INTEGER, 0)
+            expect(feed.some(post => post.id === postUnfollowed.id)).toBe(false)
+        }
+    })
+
     afterAll(async () => {
         await knex.destroy() // コネクションを閉じる
     })

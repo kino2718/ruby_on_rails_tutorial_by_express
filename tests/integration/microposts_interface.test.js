@@ -16,7 +16,7 @@ describe('microposts interface test', () => {
     beforeAll(async () => {
         const users = await testHelper.setupUsers()
         michael = users.michael
-        microposts = await testHelper.setupMicroposts(michael)
+        microposts = await testHelper.setupMicroposts(users)
         archer = users.archer
         const m = await archer.microposts.create({ content: "Oh, is that what you want? Because that's how you get ants!" })
         await m.updateAttribute('createdAt', knex.raw("datetime('now', '-2 years')"))
