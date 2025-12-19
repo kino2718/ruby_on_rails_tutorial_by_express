@@ -160,6 +160,8 @@ async function setupMicroposts(user) {
 }
 
 async function setupRelationships(users) {
+    await knex('relationships').del() // 呼び出すたびに初期化
+
     const michael = users.michael
     const archer = users.archer
     const lana = users.lana
@@ -208,6 +210,27 @@ function isRedirectTo(res, url) {
     return (res.status === REDIRECT) && (res.headers.location === url)
 }
 
+async function postRelationshipsPath(agent, followedId = null) {
+    const csrfToken = await getCsrfToken(agent)
+    return await agent
+        .post('/relationships')
+        .type('form')
+        .send({
+            _csrf: csrfToken,
+            followed_id: followedId,
+        })
+}
+
+async function deleteRelationshipsPath(agent, rel) {
+    const csrfToken = await getCsrfToken(agent)
+    return await agent
+        .post(`/relationships/${rel?.id}/delete`)
+        .type('form')
+        .send({
+            _csrf: csrfToken,
+        })
+}
+
 
 module.exports = {
     mock,
@@ -221,4 +244,6 @@ module.exports = {
     deleteMicropost,
     getCsrfToken,
     isRedirectTo,
+    postRelationshipsPath,
+    deleteRelationshipsPath,
 }

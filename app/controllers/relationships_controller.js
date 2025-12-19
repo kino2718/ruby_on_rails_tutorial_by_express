@@ -19,7 +19,7 @@ async function create(req, res) {
     const followedId = req.body.followed_id
     const user = await User.find(followedId)
     const currentUser = await sessionsHelper.currentUser(req)
-    currentUser.follow(user)
+    await currentUser.follow(user)
     res.redirect(`/users/${user.id}`)
 }
 
@@ -28,7 +28,7 @@ async function destroy(req, res) {
     const rel = await Relationship.find(relationshipId)
     const user = await rel.followed()
     const currentUser = await sessionsHelper.currentUser(req)
-    currentUser.unfollow(user)
+    await currentUser.unfollow(user)
     res.redirect(`/users/${user.id}`)
 }
 
