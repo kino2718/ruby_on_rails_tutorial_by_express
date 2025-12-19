@@ -233,18 +233,24 @@ class Micropost extends RecordBase {
         }
     }
 
-    static async count(options = { where: undefined }) {
+    static async count(options = {}) {
         let builder = knex('microposts').count('* as count')
         if (options.where) {
             const where = Micropost.#micropostToDbParams(options.where)
             builder = builder.where(where)
+        }
+        if (options.orWhereIn) {
+            const whereIn = Micropost.#micropostToDbParams(options.orWhereIn)
+            for (const [k, v] of Object.entries(whereIn)) {
+                builder = builder.orWhereIn(k, v)
+            }
         }
         const { count } = await builder.first()
         // 文字列の可能性があるので Number に変換
         return Number(count)
     }
 
-    static async paginate(perPage, offset, options = { where: undefined }) {
+    static async paginate(perPage, offset, options = {}) {
         try {
             let builder = knex('microposts').select('*')
                 .orderBy(Micropost.defaultScope.order.column, Micropost.defaultScope.order.direction)
@@ -252,6 +258,12 @@ class Micropost extends RecordBase {
             if (options.where) {
                 const where = Micropost.#micropostToDbParams(options.where)
                 builder = builder.where(where)
+            }
+            if (options.orWhereIn) {
+                const whereIn = Micropost.#micropostToDbParams(options.orWhereIn)
+                for (const [k, v] of Object.entries(whereIn)) {
+                    builder = builder.orWhereIn(k, v)
+                }
             }
             const li = await builder
             const ms = []

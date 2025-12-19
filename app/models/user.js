@@ -509,11 +509,19 @@ class User extends RecordBase {
 
     // perPage = undefined: no paginate
     async feed(perPage, offset) {
-        return await Micropost.paginate(perPage, offset, { where: { userId: this.id } })
+        const followingIds = (await this.following()).map(u => u.id)
+        return await Micropost.paginate(perPage, offset, {
+            where: { userId: this.id },
+            orWhereIn: { userId: followingIds }
+        })
     }
 
     async feedCount() {
-        return await Micropost.count({ where: { userId: this.id } })
+        const followingIds = (await this.following()).map(u => u.id)
+        return await Micropost.count({
+            where: { userId: this.id },
+            orWhereIn: { userId: followingIds }
+        })
     }
 
     async follow(otherUser) {
