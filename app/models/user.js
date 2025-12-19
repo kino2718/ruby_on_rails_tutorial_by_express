@@ -509,10 +509,13 @@ class User extends RecordBase {
 
     // perPage = undefined: no paginate
     async feed(perPage, offset) {
-        const followingIds = (await this.following()).map(u => u.id)
+        const self = this
+        const followingIdsFunc = function () {
+            this.select('followed_id').from('relationships').where('follower_id', self.id)
+        }
         return await Micropost.paginate(perPage, offset, {
             where: { userId: this.id },
-            orWhereIn: { userId: followingIds }
+            orWhereIn: { userId: followingIdsFunc }
         })
     }
 
