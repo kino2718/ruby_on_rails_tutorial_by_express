@@ -1,5 +1,6 @@
 require('dotenv').config() // 環境変数の設定
 const express = require('express')
+const helmet = require('helmet')
 const path = require('path')
 const staticPagesController = require('./controllers/static_pages_controller')
 const usersController = require('./controllers/users_controller')
@@ -18,6 +19,18 @@ const cookieParser = require('cookie-parser')
 const pluralize = require('pluralize')
 
 const app = express()
+
+// セキュリティ関連 HTTP ヘッダーの設定
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            imgSrc: ["'self'", 'https://secure.gravatar.com', 'data:'],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+        },
+    },
+}))
 
 // set the directory of template files
 app.set('views', path.join(__dirname, 'views'))
