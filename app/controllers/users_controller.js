@@ -76,7 +76,7 @@ async function show(req, res) {
     let relationshipId = null
     if (currentUser && user) {
         const rels = await currentUser.activeRelationships.findBy({ followedId: user.id })
-        const rel = rels.at(0)
+        const rel = rels?.at(0)
         relationshipId = rel?.id
     }
     const followingCount = await user?.following.count()

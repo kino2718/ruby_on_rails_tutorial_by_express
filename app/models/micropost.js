@@ -37,7 +37,7 @@ class Micropost extends RecordBase {
 
         if (!Micropost.#presence(this.content)) {
             v = false
-            props.push('userId')
+            props.push('content')
             messages.push('content can\'t be blank')
         }
 
