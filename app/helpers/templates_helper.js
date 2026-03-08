@@ -16,7 +16,8 @@ function gravatarFor(user, options = { size: 80 }) {
     const email = user.email.toLowerCase()
     const gravatarId = crypto.createHash('md5').update(email).digest('hex')
     const gravatarUrl = `https://secure.gravatar.com/avatar/${gravatarId}?s=${options.size}`
-    return `<img class="gravatar" src="${gravatarUrl}" alt="${user.name}" />`
+    const escapedName = ejs.render('<%= name %>', { name: user.name })
+    return `<img class="gravatar" src="${gravatarUrl}" alt="${escapedName}" />`
 }
 
 const ERROR_PREFIX = '<div class="field_with_errors">'
