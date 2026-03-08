@@ -464,7 +464,7 @@ class User extends RecordBase {
         const temp = await User.findBy(conds)
         if (temp.length == 0) return true
         else if (temp.length == 1) {
-            return temp.id !== this.id
+            return temp[0].id === this.id
         }
         return false
     }
