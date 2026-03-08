@@ -17,7 +17,7 @@ router.get('/:resetToken/edit', async (req, res) => {
     await edit(req, res)
 })
 
-router.post('/:resetToken', async (req, res, next) => {
+router.post('/:resetToken', csrfHelper.verifyCsrfToken, async (req, res, next) => {
     await update(req, res, next)
 })
 
